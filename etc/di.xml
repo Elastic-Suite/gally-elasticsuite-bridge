@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Preferences for Index Operations -->
+    <!-- Will be used to hook on createIndex, refreshIndex, deleteIndex, bulk, etc... to make actions on Gally backend -->
+    <preference for="Smile\ElasticsuiteCore\Api\Index\IndexOperationInterface"
+                type="Gally\ElasticsuiteBridge\Index\IndexOperation" />
+
+    <preference for="Smile\ElasticsuiteCore\Api\Index\AsyncIndexOperationInterface"
+                type="Gally\ElasticsuiteBridge\Index\AsyncIndexOperation" />
+
+    <preference for="Smile\ElasticsuiteCore\Api\Index\Bulk\BulkRequestInterface"
+                type="Gally\ElasticsuiteBridge\Index\Bulk\BulkRequest"/>
+</config>
