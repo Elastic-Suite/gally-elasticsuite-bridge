@@ -11,4 +11,43 @@
 
     <preference for="Smile\ElasticsuiteCore\Api\Index\Bulk\BulkRequestInterface"
                 type="Gally\ElasticsuiteBridge\Index\Bulk\BulkRequest"/>
+
+
+    <!-- Attribute Helper preferences to deal with new data structure -->
+    <preference for="Smile\ElasticsuiteCatalog\Helper\ProductAttribute"
+                type="Gally\ElasticsuiteBridge\Helper\ProductAttribute"/>
+
+    <preference for="Smile\ElasticsuiteCatalog\Helper\CategoryAttribute"
+                type="Gally\ElasticsuiteBridge\Helper\CategoryAttribute"/>
+
+
+    <virtualType name="productAttributeHelper" type="Gally\ElasticsuiteBridge\Helper\AbstractAttribute">
+        <arguments>
+            <argument name="collectionFactory" xsi:type="object">Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="categoryAttributeHelper" type="Gally\ElasticsuiteBridge\Helper\AbstractAttribute">
+        <arguments>
+            <argument name="collectionFactory" xsi:type="object">Magento\Catalog\Model\ResourceModel\Category\Attribute\CollectionFactory</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Gally\ElasticsuiteBridge\Helper\ProductAttribute">
+        <arguments>
+            <argument name="attributeHelper" xsi:type="object">productAttributeHelper</argument>
+        </arguments>
+    </type>
+
+    <type name="Gally\ElasticsuiteBridge\Helper\CategoryAttribute">
+        <arguments>
+            <argument name="attributeHelper" xsi:type="object">categoryAttributeHelper</argument>
+        </arguments>
+    </type>
+    <!-- End of Attribute Helper -->
+
+    <!-- Datasource preferences, because data structure has to be different for Gally -->
+    <preference for="Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\AttributeData"
+                type="Gally\ElasticsuiteBridge\Model\Product\Indexer\Fulltext\Datasource\AttributeData"/>
+
 </config>
