@@ -1,43 +1,31 @@
 <?php
 
-namespace Gally\ElasticsuiteBridge\Model\Category\Indexer\Fulltext\Datasource;
+namespace Gally\ElasticsuiteBridge\Plugin\Category\Indexer\Fulltext\Datasource;
 
-use Gally\ElasticsuiteBridge\Export\File;
 use Gally\ElasticsuiteBridge\Model\Gally\Category\Exporter;
 use Magento\Store\Model\StoreManagerInterface;
-use Gally\ElasticsuiteBridge\Helper\CategoryAttribute as AttributeHelper;
-use Smile\ElasticsuiteCatalog\Model\ResourceModel\Eav\Indexer\Fulltext\Datasource\AbstractAttributeData as ResourceModel;
-use Smile\ElasticsuiteCore\Api\Index\DatasourceInterface;
-use Smile\ElasticsuiteCore\Index\Mapping\FieldFactory;
+use Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext\Datasource\AttributeData;
 
-class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext\Datasource\AttributeData implements DatasourceInterface
+class AttributeDataPlugin
 {
-    /*
+
     public function __construct(
-        ResourceModel         $resourceModel,
-        FieldFactory          $fieldFactory,
-        AttributeHelper       $attributeHelper,
         Exporter              $exporter,
-        StoreManagerInterface $storeManager,
-        array                 $indexedBackendModels = []
+        StoreManagerInterface $storeManager
     )
     {
-        parent::__construct($resourceModel, $fieldFactory, $attributeHelper, $indexedBackendModels);
         $this->exporter     = $exporter;
         $this->storeManager = $storeManager;
 
-    }*/
+    }
 
-    public function addData($storeId, array $indexData)
+    public function aroundAddData(AttributeData $subject, \Closure $proceed, $storeId, $indexData)
     {
-        // There is a strange circular dependency when injecting them in constructor, probably due to other parameters.
-        $this->storeManager   = \Magento\Framework\App\ObjectManager::getInstance()->get(StoreManagerInterface::class);
-        $this->exporter       = \Magento\Framework\App\ObjectManager::getInstance()->get(Exporter::class);
-        $data                 = parent::addData($storeId, $indexData);
+        $data                 = $proceed($storeId, $indexData);
         $catalogCode          = $this->storeManager->getWebsite($this->storeManager->getStore($storeId)->getWebsiteId())->getCode();
         $localizedCatalogCode = $this->storeManager->getStore($storeId)->getCode();
 
-        foreach ($data as $categoryId => &$categoryData) {
+        foreach ($data as &$categoryData) {
 
             $categoryIdentifier = 'cat_' . (string)$categoryData['entity_id'];
             $categoryData['id'] = $categoryIdentifier;

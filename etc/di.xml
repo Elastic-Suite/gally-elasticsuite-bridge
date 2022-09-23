@@ -49,8 +49,17 @@
     <preference for="Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\AttributeData"
                 type="Gally\ElasticsuiteBridge\Model\Product\Indexer\Fulltext\Datasource\AttributeData"/>
 
-    <preference for="Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext\Datasource\AttributeData"
-                type="Gally\ElasticsuiteBridge\Model\Category\Indexer\Fulltext\Datasource\AttributeData"/>
+    <type name="Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\PriceData">
+        <plugin name="rename_customer_group" type="Gally\ElasticsuiteBridge\Plugin\Product\Indexer\Fulltext\Datasource\PriceDataPlugin" sortOrder="10"/>
+    </type>
+
+    <type name="Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\CategoryData">
+        <plugin name="rename_category_data" type="Gally\ElasticsuiteBridge\Plugin\Product\Indexer\Fulltext\Datasource\CategoryDataPlugin" sortOrder="10"/>
+    </type>
+
+    <type name="Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext\Datasource\AttributeData">
+        <plugin name="export_category_data" type="Gally\ElasticsuiteBridge\Plugin\Category\Indexer\Fulltext\Datasource\AttributeDataPlugin" sortOrder="10"/>
+    </type>
 
     <!-- Plugin on full reindex to export additional data (source fields) to Gally -->
     <type name="Magento\CatalogSearch\Model\Indexer\Fulltext">
