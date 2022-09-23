@@ -54,7 +54,7 @@ class Exporter
 
     public function addCategoryData($categoryIdentifier, $data)
     {
-        $this->categoryData['Elasticsuite\Category\Model\Category'][$categoryIdentifier] = $data;
+        $this->categoryData['Elasticsuite\Category\Model\Category\Configuration'][$categoryIdentifier] = $data;
     }
 
     public function addCategoryConfiguration($categoryIdentifier, $data)
