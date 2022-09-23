@@ -7,7 +7,6 @@ use Gally\ElasticsuiteBridge\Model\Gally\Category\Exporter;
 use Magento\Store\Model\StoreManagerInterface;
 use Gally\ElasticsuiteBridge\Helper\CategoryAttribute as AttributeHelper;
 use Smile\ElasticsuiteCatalog\Model\ResourceModel\Eav\Indexer\Fulltext\Datasource\AbstractAttributeData as ResourceModel;
-use Smile\ElasticsuiteVirtualCategory\Model\ResourceModel\Category\Product\Position;
 use Smile\ElasticsuiteCore\Api\Index\DatasourceInterface;
 use Smile\ElasticsuiteCore\Index\Mapping\FieldFactory;
 
@@ -34,7 +33,6 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fu
         // There is a strange circular dependency when injecting them in constructor, probably due to other parameters.
         $this->storeManager   = \Magento\Framework\App\ObjectManager::getInstance()->get(StoreManagerInterface::class);
         $this->exporter       = \Magento\Framework\App\ObjectManager::getInstance()->get(Exporter::class);
-        $this->positionResource = \Magento\Framework\App\ObjectManager::getInstance()->get(Position::class);
         $data                 = parent::addData($storeId, $indexData);
         $catalogCode          = $this->storeManager->getWebsite($this->storeManager->getStore($storeId)->getWebsiteId())->getCode();
         $localizedCatalogCode = $this->storeManager->getStore($storeId)->getCode();
