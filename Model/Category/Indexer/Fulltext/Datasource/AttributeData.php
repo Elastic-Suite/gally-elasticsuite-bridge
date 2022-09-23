@@ -5,13 +5,15 @@ namespace Gally\ElasticsuiteBridge\Model\Category\Indexer\Fulltext\Datasource;
 use Gally\ElasticsuiteBridge\Export\File;
 use Gally\ElasticsuiteBridge\Model\Gally\Category\Exporter;
 use Magento\Store\Model\StoreManagerInterface;
-use Smile\ElasticsuiteCatalog\Helper\AbstractAttribute as AttributeHelper;
+use Gally\ElasticsuiteBridge\Helper\CategoryAttribute as AttributeHelper;
 use Smile\ElasticsuiteCatalog\Model\ResourceModel\Eav\Indexer\Fulltext\Datasource\AbstractAttributeData as ResourceModel;
+use Smile\ElasticsuiteVirtualCategory\Model\ResourceModel\Category\Product\Position;
 use Smile\ElasticsuiteCore\Api\Index\DatasourceInterface;
 use Smile\ElasticsuiteCore\Index\Mapping\FieldFactory;
 
 class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext\Datasource\AttributeData implements DatasourceInterface
 {
+    /*
     public function __construct(
         ResourceModel         $resourceModel,
         FieldFactory          $fieldFactory,
@@ -21,18 +23,23 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fu
         array                 $indexedBackendModels = []
     )
     {
+        parent::__construct($resourceModel, $fieldFactory, $attributeHelper, $indexedBackendModels);
         $this->exporter     = $exporter;
         $this->storeManager = $storeManager;
-        parent::__construct($resourceModel, $fieldFactory, $attributeHelper, $indexedBackendModels);
-    }
+
+    }*/
 
     public function addData($storeId, array $indexData)
     {
+        // There is a strange circular dependency when injecting them in constructor, probably due to other parameters.
+        $this->storeManager   = \Magento\Framework\App\ObjectManager::getInstance()->get(StoreManagerInterface::class);
+        $this->exporter       = \Magento\Framework\App\ObjectManager::getInstance()->get(Exporter::class);
+        $this->positionResource = \Magento\Framework\App\ObjectManager::getInstance()->get(Position::class);
         $data                 = parent::addData($storeId, $indexData);
         $catalogCode          = $this->storeManager->getWebsite($this->storeManager->getStore($storeId)->getWebsiteId())->getCode();
         $localizedCatalogCode = $this->storeManager->getStore($storeId)->getCode();
 
-        foreach ($data as $categoryData) {
+        foreach ($data as $categoryId => &$categoryData) {
 
             $categoryIdentifier = 'cat_' . (string)$categoryData['entity_id'];
             $categoryData['id'] = $categoryIdentifier;
@@ -42,6 +49,7 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fu
                 $path = 'cat_' . $path;
             }
             $categoryPath = implode('/', $paths);
+            $categoryData['path'] = $categoryPath;
 
             $this->exporter->addCategoryData(
                 $categoryIdentifier,

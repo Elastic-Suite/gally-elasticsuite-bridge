@@ -3,7 +3,7 @@
 
     <!-- Preferences for Index Operations -->
     <!-- Will be used to hook on createIndex, refreshIndex, deleteIndex, bulk, etc... to make actions on Gally backend -->
-    <!--<preference for="Smile\ElasticsuiteCore\Api\Index\IndexOperationInterface"
+    <!-- <preference for="Smile\ElasticsuiteCore\Api\Index\IndexOperationInterface"
                 type="Gally\ElasticsuiteBridge\Index\IndexOperation" />
 
     <preference for="Smile\ElasticsuiteCore\Api\Index\AsyncIndexOperationInterface"
@@ -11,7 +11,6 @@
 
     <preference for="Smile\ElasticsuiteCore\Api\Index\Bulk\BulkRequestInterface"
                 type="Gally\ElasticsuiteBridge\Index\Bulk\BulkRequest"/>
-
 
     <!-- Attribute Helper preferences to deal with new data structure -->
     <preference for="Smile\ElasticsuiteCatalog\Helper\ProductAttribute"
