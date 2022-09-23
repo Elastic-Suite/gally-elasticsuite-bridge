@@ -53,7 +53,7 @@ class AttributeDataPlugin
                     'category'         => sprintf('@%s', $categoryIdentifier),
                     'catalog'          => sprintf('@%s', $catalogCode),
                     'localizedCatalog' => sprintf('@%s', $localizedCatalogCode),
-                    'name'             => $categoryData['name'],
+                    'name'             => is_array($categoryData['name']) ? current($categoryData['name']) : $categoryData['name'],
                 ]
             );
         }
