@@ -81,6 +81,10 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
             }
         }
 
+        foreach ($indexData as $productId => &$data) {
+            $data['id'] = $productId;
+        }
+
         return $this->filterCompositeProducts($indexData);
     }
 
@@ -103,7 +107,6 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
                 if (!isset($indexData[$productId])) {
                     $indexData[$productId] = [];
                 }
-
                 $indexData[$productId] += $indexValues;
 
                 $this->addIndexedAttribute($indexData[$productId], $row['attribute_code']);
