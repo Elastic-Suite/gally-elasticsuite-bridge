@@ -8,7 +8,7 @@ use Magento\Store\Model\StoreManagerInterface;
 
 class Exporter
 {
-    private $fileExpor;
+    private $fileExport;
 
     /**
      * @param \Gally\ElasticsuiteBridge\Export\File $fileExport File Exporter

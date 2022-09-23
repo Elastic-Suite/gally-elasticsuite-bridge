@@ -3,11 +3,11 @@
 
     <!-- Preferences for Index Operations -->
     <!-- Will be used to hook on createIndex, refreshIndex, deleteIndex, bulk, etc... to make actions on Gally backend -->
-    <preference for="Smile\ElasticsuiteCore\Api\Index\IndexOperationInterface"
+    <!--<preference for="Smile\ElasticsuiteCore\Api\Index\IndexOperationInterface"
                 type="Gally\ElasticsuiteBridge\Index\IndexOperation" />
 
     <preference for="Smile\ElasticsuiteCore\Api\Index\AsyncIndexOperationInterface"
-                type="Gally\ElasticsuiteBridge\Index\AsyncIndexOperation" />
+                type="Gally\ElasticsuiteBridge\Index\AsyncIndexOperation" />-->
 
     <preference for="Smile\ElasticsuiteCore\Api\Index\Bulk\BulkRequestInterface"
                 type="Gally\ElasticsuiteBridge\Index\Bulk\BulkRequest"/>
@@ -50,6 +50,8 @@
     <preference for="Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\AttributeData"
                 type="Gally\ElasticsuiteBridge\Model\Product\Indexer\Fulltext\Datasource\AttributeData"/>
 
+    <preference for="Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext\Datasource\AttributeData"
+                type="Gally\ElasticsuiteBridge\Model\Category\Indexer\Fulltext\Datasource\AttributeData"/>
 
     <!-- Plugin on full reindex to export additional data (source fields) to Gally -->
     <type name="Magento\CatalogSearch\Model\Indexer\Fulltext">
