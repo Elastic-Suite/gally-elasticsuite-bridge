@@ -41,7 +41,7 @@ class Exporter
 
         $sourceFieldIdentifier = $entityType . '_' . $attributeCode;
         $this->sourceFieldData[$entityType]['Elasticsuite\Metadata\Model\SourceField'][$sourceFieldIdentifier] = [
-            'metadata'       => '@product',
+            'metadata'       => sprintf('@%s', $entityType),
             'code'           => $attributeCode,
             'type'           => $type,
             'isSearchable'   => (bool)$attribute->getIsSearchable(),
@@ -53,8 +53,9 @@ class Exporter
         ];
 
         foreach ($this->storeManager->getStores() as $store) {
+            $sourceFieldLabelIdentifier = $sourceFieldIdentifier . '_' . $store->getCode();
             $attribute->setStoreId($store->getId());
-            $this->sourceFieldLabelData[$entityType]['Elasticsuite\Metadata\Model\SourceFieldLabel'][] = [
+            $this->sourceFieldLabelData[$entityType]['Elasticsuite\Metadata\Model\SourceFieldLabel'][$sourceFieldLabelIdentifier] = [
                 'source_field' => sprintf('@%s', $sourceFieldIdentifier),
                 'catalog'      => sprintf('@%s', $store->getCode()),
                 'label'        => $attribute->getStoreLabel($store->getId()),
@@ -73,13 +74,13 @@ class Exporter
                                                                  ->load();
 
                     foreach ($options as $option) {
-                        $optionIdentifier                                                                          = $sourceFieldIdentifier . '_' . 'option_' . $option->getId();
+                        $optionIdentifier = $sourceFieldIdentifier . '_' . 'option_' . $option->getId();
                         $this->sourceFieldOptionData[$entityType]['Elasticsuite\Metadata\Model\SourceFieldOption'][$optionIdentifier] = [
                             'source_field' => sprintf('@%s', $sourceFieldIdentifier),
                             'position'     => (int)$option->getSortOrder(),
                         ];
 
-                        $optionLabelIdentifier                                                                                    = $optionIdentifier . '_' . $store->getCode();
+                        $optionLabelIdentifier = $optionIdentifier . '_' . $store->getCode();
                         $this->sourceFieldOptionLabelData[$entityType]['Elasticsuite\Metadata\Model\SourceFieldOptionLabel'][$optionLabelIdentifier] = [
                             'source_field_option' => sprintf('@%s', $sourceFieldIdentifier),
                             'catalog'             => sprintf('@%s', $store->getCode()),
