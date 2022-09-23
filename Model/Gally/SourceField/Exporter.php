@@ -18,16 +18,13 @@ class Exporter
         $this->fileExport = $fileExport;
         $this->attrOptionCollectionFactory = $optionCollectionFactory;
         $this->storeManager = $storeManager;
-
-        // This class is a singleton, so create the file only once.
-        $this->fileExport->createFile('source_field', '', 'yaml');
-        $this->fileExport->createFile('source_field_label', '', 'yaml');
-        $this->fileExport->createFile('source_field_option', '', 'yaml');
-        $this->fileExport->createFile('source_field_option_label', '', 'yaml');
     }
 
     public function addSourceField(\Magento\Eav\Model\Entity\Attribute $attribute, string $entityType)
     {
+        $this->entityTypes[] = $entityType;
+        $this->entityTypes = array_unique($this->entityTypes);
+
         $attributeId   = (int)$attribute->getId();
         $attributeCode = (string)$attribute->getAttributeCode();
 
@@ -43,7 +40,7 @@ class Exporter
         }
 
         $sourceFieldIdentifier = $entityType . '_' . $attributeCode;
-        $this->sourceFieldData['Elasticsuite\Metadata\Model\SourceField'][$sourceFieldIdentifier] = [
+        $this->sourceFieldData[$entityType]['Elasticsuite\Metadata\Model\SourceField'][$sourceFieldIdentifier] = [
             'metadata'       => '@product',
             'code'           => $attributeCode,
             'type'           => $type,
@@ -57,7 +54,7 @@ class Exporter
 
         foreach ($this->storeManager->getStores() as $store) {
             $attribute->setStoreId($store->getId());
-            $this->sourceFieldLabelData['Elasticsuite\Metadata\Model\SourceFieldLabel'][] = [
+            $this->sourceFieldLabelData[$entityType]['Elasticsuite\Metadata\Model\SourceFieldLabel'][] = [
                 'source_field' => sprintf('@%s', $sourceFieldIdentifier),
                 'catalog'      => sprintf('@%s', $store->getCode()),
                 'label'        => $attribute->getStoreLabel($store->getId()),
@@ -77,13 +74,13 @@ class Exporter
 
                     foreach ($options as $option) {
                         $optionIdentifier                                                                          = $sourceFieldIdentifier . '_' . 'option_' . $option->getId();
-                        $this->sourceFieldOptionData['Elasticsuite\Metadata\Model\SourceFieldOption'][$optionIdentifier] = [
+                        $this->sourceFieldOptionData[$entityType]['Elasticsuite\Metadata\Model\SourceFieldOption'][$optionIdentifier] = [
                             'source_field' => sprintf('@%s', $sourceFieldIdentifier),
                             'position'     => (int)$option->getSortOrder(),
                         ];
 
                         $optionLabelIdentifier                                                                                    = $optionIdentifier . '_' . $store->getCode();
-                        $this->sourceFieldOptionLabelData['Elasticsuite\Metadata\Model\SourceFieldOptionLabel'][$optionLabelIdentifier] = [
+                        $this->sourceFieldOptionLabelData[$entityType]['Elasticsuite\Metadata\Model\SourceFieldOptionLabel'][$optionLabelIdentifier] = [
                             'source_field_option' => sprintf('@%s', $sourceFieldIdentifier),
                             'catalog'             => sprintf('@%s', $store->getCode()),
                             'label'               => $option->getValue(),
@@ -97,12 +94,12 @@ class Exporter
                     $optionIdentifier = $sourceFieldIdentifier . '_' . 'option_' . $option['value'];
                     $optionLabelIdentifier = $optionIdentifier . '_' . $store->getCode();
 
-                    $this->sourceFieldOptionData['Elasticsuite\Metadata\Model\SourceFieldOption'][$optionIdentifier] = [
+                    $this->sourceFieldOptionData[$entityType]['Elasticsuite\Metadata\Model\SourceFieldOption'][$optionIdentifier] = [
                         'source_field' => sprintf('@%s', $sourceFieldIdentifier),
                         'position'     => (int) $key,
                     ];
 
-                    $this->sourceFieldOptionLabelData['Elasticsuite\Metadata\Model\SourceFieldOptionLabel'][$optionLabelIdentifier] = [
+                    $this->sourceFieldOptionLabelData[$entityType]['Elasticsuite\Metadata\Model\SourceFieldOptionLabel'][$optionLabelIdentifier] = [
                         'source_field_option' => sprintf('@%s', $sourceFieldIdentifier),
                         'catalog'             => sprintf('@%s', $store->getCode()),
                         'label'               => (string) $option['label'],
@@ -110,15 +107,22 @@ class Exporter
                 }
             }
         }
-
-
     }
 
     public function __destruct()
     {
-        $this->fileExport->writeYaml('source_field', $this->sourceFieldData);
-        $this->fileExport->writeYaml('source_field_label', $this->sourceFieldLabelData);
-        $this->fileExport->writeYaml('source_field_option', $this->sourceFieldOptionData);
-        $this->fileExport->writeYaml('source_field_option_label', $this->sourceFieldOptionLabelData);
+        foreach ($this->entityTypes as $entityType) {
+            // This class is a singleton, so create the file only once.
+            $this->fileExport->createFile($entityType . '_source_field', '', 'yaml');
+            $this->fileExport->createFile($entityType . '_source_field_label', '', 'yaml');
+            $this->fileExport->createFile($entityType . '_source_field_option', '', 'yaml');
+            $this->fileExport->createFile($entityType . '_source_field_option_label', '', 'yaml');
+
+
+            $this->fileExport->writeYaml($entityType . '_source_field', $this->sourceFieldData[$entityType]);
+            $this->fileExport->writeYaml($entityType . '_source_field_label', $this->sourceFieldLabelData[$entityType]);
+            $this->fileExport->writeYaml($entityType . '_source_field_option', $this->sourceFieldOptionData[$entityType]);
+            $this->fileExport->writeYaml($entityType . '_source_field_option_label', $this->sourceFieldOptionLabelData[$entityType]);
+        }
     }
 }
