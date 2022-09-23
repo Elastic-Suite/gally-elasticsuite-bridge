@@ -50,4 +50,13 @@
     <preference for="Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\AttributeData"
                 type="Gally\ElasticsuiteBridge\Model\Product\Indexer\Fulltext\Datasource\AttributeData"/>
 
+
+    <!-- Plugin on full reindex to export additional data (source fields) to Gally -->
+    <type name="Magento\CatalogSearch\Model\Indexer\Fulltext">
+        <plugin name="gallyProductIndexerPlugin" type="Gally\ElasticsuiteBridge\Plugin\Product\IndexPlugin" sortOrder="10"/>
+    </type>
+
+    <type name="Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext">
+        <plugin name="gallyCategoryIndexerPlugin" type="Gally\ElasticsuiteBridge\Plugin\Category\IndexPlugin" sortOrder="10"/>
+    </type>
 </config>

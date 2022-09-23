@@ -21,8 +21,8 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation implem
     public function createIndex($indexIdentifier, $store)
     {
         // Init Gally index JSON file. Later, call Gally API to create the index.
-
-        $this->fileExport->createFile($indexIdentifier);
+        // Creating a file each time we call createIndex is not ok, since we want to write everything in one file for multi-stores.
+        //$this->fileExport->createFile($indexIdentifier);
 
         return parent::createIndex($indexIdentifier, $store);
     }
