@@ -82,7 +82,7 @@ class Exporter
 
                         $optionLabelIdentifier = $optionIdentifier . '_' . $store->getCode();
                         $this->sourceFieldOptionLabelData[$entityType]['Elasticsuite\Metadata\Model\SourceFieldOptionLabel'][$optionLabelIdentifier] = [
-                            'source_field_option' => sprintf('@%s', $sourceFieldIdentifier),
+                            'source_field_option' => sprintf('@%s', $optionIdentifier),
                             'catalog'             => sprintf('@%s', $store->getCode()),
                             'label'               => $option->getValue(),
                         ];
