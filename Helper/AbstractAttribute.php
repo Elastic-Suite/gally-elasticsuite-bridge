@@ -43,7 +43,7 @@ class AbstractAttribute extends \Smile\ElasticsuiteCatalog\Helper\AbstractAttrib
             foreach ($values[$attributeCode] ?? [] as $uniqueOptionValue) {
                 $label = $this->getIndexOptionsText($attributeId, $storeId, [$uniqueOptionValue]);
                 $optionValues[] = [
-                    'id'    => $uniqueOptionValue,
+                    'value' => $uniqueOptionValue,
                     'label' => current($label)
                 ];
             }

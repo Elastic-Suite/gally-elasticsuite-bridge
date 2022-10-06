@@ -60,7 +60,7 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
                 $enabled = false;
                 if (isset($childrenData['status'])) {
                     $status  = current($childrenData['status']);
-                    $enabled = isset($status['id']) && ($status['id'] == 1);
+                    $enabled = isset($status['value']) && ($status['value'] == 1);
                 }
                 // End of override
                 if ($enabled === false) {
@@ -82,6 +82,13 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
         }
 
         foreach ($indexData as $productId => &$data) {
+            if (isset($data['visibility'])) {
+                $visibility = [
+                    'value' => $data['visibility'],
+                    'label' => \Magento\Catalog\Model\Product\Visibility::getOptionText($data['visibility']),
+                ];
+                $data['visibility'] = $visibility;
+            }
             $data['id'] = $productId;
         }
 
