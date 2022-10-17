@@ -8,6 +8,8 @@ use Magento\Eav\Model\Entity\Attribute\AttributeInterface;
 
 abstract class AbstractPlugin
 {
+    public const FORBIDDEN_FIELD_NAMES = ['children'];
+
     protected $indexedBackendModels = [
         \Magento\Eav\Model\Entity\Attribute\Backend\ArrayBackend::class,
         \Magento\Eav\Model\Entity\Attribute\Backend\Datetime::class,
@@ -25,8 +27,7 @@ abstract class AbstractPlugin
      */
     public function __construct(
         array $indexedBackendModels = []
-    )
-    {
+    ) {
         if (is_array($indexedBackendModels) && !empty($indexedBackendModels)) {
             $indexedBackendModels       = array_values($indexedBackendModels);
             $this->indexedBackendModels = array_merge($indexedBackendModels, $this->indexedBackendModels);
@@ -44,12 +45,13 @@ abstract class AbstractPlugin
     {
         // 'price' attribute is declared as nested field into the indices file.
         $canIndex = $attribute->getBackendType() != 'static' && $attribute->getAttributeCode() !== 'price';
+        $canIndex = $canIndex && !(in_array($attribute->getAttributeCode(), self::FORBIDDEN_FIELD_NAMES));
 
         if ($canIndex && $attribute->getBackendModel()) {
             foreach ($this->indexedBackendModels as $indexedBackendModel) {
                 $canIndex = is_a($attribute->getBackendModel(), $indexedBackendModel, true);
                 if ($canIndex) {
-                    return $canIndex;
+                    return true;
                 }
             }
         }

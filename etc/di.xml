@@ -3,14 +3,38 @@
 
     <!-- Preferences for Index Operations -->
     <!-- Will be used to hook on createIndex, refreshIndex, deleteIndex, bulk, etc... to make actions on Gally backend -->
-    <!-- <preference for="Smile\ElasticsuiteCore\Api\Index\IndexOperationInterface"
+    <preference for="Smile\ElasticsuiteCore\Api\Index\IndexOperationInterface"
                 type="Gally\ElasticsuiteBridge\Index\IndexOperation" />
 
-    <preference for="Smile\ElasticsuiteCore\Api\Index\AsyncIndexOperationInterface"
+    <!--<preference for="Smile\ElasticsuiteCore\Api\Index\AsyncIndexOperationInterface"
                 type="Gally\ElasticsuiteBridge\Index\AsyncIndexOperation" />-->
 
     <preference for="Smile\ElasticsuiteCore\Api\Index\Bulk\BulkRequestInterface"
                 type="Gally\ElasticsuiteBridge\Index\Bulk\BulkRequest"/>
+
+    <type name="\Gally\ElasticsuiteBridge\Indexer\GenericIndexerHandler">
+        <arguments>
+            <argument name="indexOperation" xsi:type="object">\Gally\ElasticsuiteBridge\Index\IndexOperation</argument>
+        </arguments>
+    </type>
+
+    <!-- We will create "catalogs" and "localizedCatalogs" according to index dimensions -->
+    <virtualType name="catalogCategorySearchIndexHandler" type="\Gally\ElasticsuiteBridge\Indexer\GenericIndexerHandler">
+        <arguments>
+            <argument name="indexName" xsi:type="string">catalog_category</argument>
+            <argument name="typeName" xsi:type="string">category</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="catalogProductSearchIndexHandler" type="\Gally\ElasticsuiteBridge\Indexer\GenericIndexerHandler">
+        <arguments>
+            <argument name="indexName" xsi:type="string">catalog_product</argument>
+            <argument name="typeName" xsi:type="string">product</argument>
+        </arguments>
+    </virtualType>
+
+    <preference for="Smile\ElasticsuiteCore\Indexer\GenericIndexerHandler"
+                type="Gally\ElasticsuiteBridge\Indexer\GenericIndexerHandler"/>
 
     <!-- Attribute Helper preferences to deal with new data structure -->
     <preference for="Smile\ElasticsuiteCatalog\Helper\ProductAttribute"

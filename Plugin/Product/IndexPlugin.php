@@ -2,9 +2,8 @@
 
 namespace Gally\ElasticsuiteBridge\Plugin\Product;
 
-use Gally\ElasticsuiteBridge\Export\File;
+use Gally\ElasticsuiteBridge\Gally\SourceFieldManager;
 use Gally\ElasticsuiteBridge\Helper\ProductAttribute;
-use Gally\ElasticsuiteBridge\Model\Gally\SourceField\Exporter;
 use Gally\ElasticsuiteBridge\Plugin\AbstractPlugin;
 
 class IndexPlugin extends AbstractPlugin
@@ -14,42 +13,36 @@ class IndexPlugin extends AbstractPlugin
      */
     protected $attributeHelper;
 
-    private $fileExport;
-
-    private $sourceFieldExporter;
+    /**
+     * @var \Gally\ElasticsuiteBridge\Gally\SourceFieldManager
+     */
+    private $sourceFieldManager;
 
     /**
      * Constructor
      *
-     * @param File             $fileExport           Gally file export.
-     * @param ProductAttribute $attributeHelper      Attribute helper.
-     * @param Exporter         $sourceFieldExporter  Source Field Exporter.
-     * @param array            $indexedBackendModels List of indexed backend models added to the default list.
+     * @param ProductAttribute   $attributeHelper      Attribute helper.
+     * @param SourceFieldManager $sourceFieldManager   Source Field Manager.
+     * @param array              $indexedBackendModels List of indexed backend models added to the default list.
      */
     public function __construct(
-        File             $fileExport,
-        ProductAttribute $attributeHelper,
-        Exporter         $sourceFieldExporter,
-        array            $indexedBackendModels = []
-    )
-    {
-        $this->fileExport          = $fileExport;
-        $this->attributeHelper     = $attributeHelper;
-        $this->sourceFieldExporter = $sourceFieldExporter;
+        ProductAttribute   $attributeHelper,
+        SourceFieldManager $sourceFieldManager,
+        array              $indexedBackendModels = []
+    ) {
+        $this->attributeHelper    = $attributeHelper;
+        $this->sourceFieldManager = $sourceFieldManager;
 
         parent::__construct($indexedBackendModels);
     }
 
     public function beforeExecuteFull(\Magento\CatalogSearch\Model\Indexer\Fulltext $subject)
     {
-        // Re-init product file.
-        $this->fileExport->createFile('product');
-
-        $this->initAttributes();
+        //$this->initAttributes();
     }
 
     /**
-     * Init attributes used into ES.
+     * Init attributes used in Gally.
      *
      * @return \Smile\ElasticsuiteCatalog\Model\Eav\Indexer\Fulltext\Datasource\AbstractAttributeData
      */
@@ -60,7 +53,7 @@ class IndexPlugin extends AbstractPlugin
         /** @var \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute */
         foreach ($attributeCollection as $attribute) {
             if ($this->canIndexAttribute($attribute)) {
-                $this->sourceFieldExporter->addSourceField($attribute, 'product');
+                $this->sourceFieldManager->addSourceField($attribute, 'product');
             }
         }
     }

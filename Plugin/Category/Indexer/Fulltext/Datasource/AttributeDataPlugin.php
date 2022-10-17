@@ -2,31 +2,13 @@
 
 namespace Gally\ElasticsuiteBridge\Plugin\Category\Indexer\Fulltext\Datasource;
 
-use Gally\ElasticsuiteBridge\Model\Gally\Category\Exporter;
-use Magento\Store\Model\StoreManagerInterface;
 use Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext\Datasource\AttributeData;
 
 class AttributeDataPlugin
 {
-
-    public function __construct(
-        Exporter              $exporter,
-        StoreManagerInterface $storeManager
-    )
+    public function afterAddData(AttributeData $subject, $result)
     {
-        $this->exporter     = $exporter;
-        $this->storeManager = $storeManager;
-
-    }
-
-    public function aroundAddData(AttributeData $subject, \Closure $proceed, $storeId, $indexData)
-    {
-        $data                 = $proceed($storeId, $indexData);
-        $catalogCode          = $this->storeManager->getWebsite($this->storeManager->getStore($storeId)->getWebsiteId())->getCode();
-        $localizedCatalogCode = $this->storeManager->getStore($storeId)->getCode();
-
-        foreach ($data as &$categoryData) {
-
+        foreach ($result as &$categoryData) {
             $categoryIdentifier = 'cat_' . (string)$categoryData['entity_id'];
             $categoryData['id'] = $categoryIdentifier;
             $paths      = explode('/', $categoryData['path']);
@@ -37,27 +19,19 @@ class AttributeDataPlugin
             $categoryPath = implode('/', $paths);
             $categoryData['path'] = $categoryPath;
 
-            $this->exporter->addCategoryData(
-                $categoryIdentifier,
-                [
-                    'id'       => $categoryIdentifier,
-                    'parentId' => 'cat_' . (string)$categoryData['parent_id'],
-                    'level'    => (int)$categoryData['level'],
-                    'path'     => $categoryPath,
-                ]
-            );
-
-            $this->exporter->addCategoryConfiguration(
-                'config_' . $categoryIdentifier . '_' . $localizedCatalogCode,
-                [
-                    'category'         => sprintf('@%s', $categoryIdentifier),
-                    'catalog'          => sprintf('@%s', $catalogCode),
-                    'localizedCatalog' => sprintf('@%s', $localizedCatalogCode),
-                    'name'             => is_array($categoryData['name']) ? current($categoryData['name']) : $categoryData['name'],
-                ]
-            );
+            // is_active is fetch from SQL directly and is not processed as other attributes.
+            // we don't go through the helper to have a nice formatting.
+            // but the source field is created as a "select" so we must be consistent.
+            // Otherwise, categories are rejected.
+            if (isset($categoryData['is_active'])) {
+                $isActive = [
+                    'value' => $categoryData['is_active'],
+                    'label' => $categoryData['is_active'] ? 'Yes' : 'No',
+                ];
+                $categoryData['is_active'] = $isActive;
+            }
         }
 
-        return $data;
+        return $result;
     }
 }

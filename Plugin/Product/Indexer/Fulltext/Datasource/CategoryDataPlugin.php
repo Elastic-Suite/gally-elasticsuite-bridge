@@ -3,7 +3,6 @@
 namespace Gally\ElasticsuiteBridge\Plugin\Product\Indexer\Fulltext\Datasource;
 
 use Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\CategoryData;
-use Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\PriceData;
 
 class CategoryDataPlugin
 {

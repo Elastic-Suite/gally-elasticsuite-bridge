@@ -7,22 +7,28 @@ use Smile\ElasticsuiteCore\Api\Index\IndexInterface;
 
 class BulkRequest extends \Smile\ElasticsuiteCore\Index\Bulk\BulkRequest
 {
-    public function __construct(File $fileExport)
+    /**
+     * Bulk operation stack.
+     *
+     * @var array
+     */
+    private $bulkData = [];
+
+    /**
+     * {@inheritdoc}
+     */
+    public function addDocument(IndexInterface $index, $docId, array $data)
     {
-        $this->fileExport = $fileExport;
+        $this->bulkData[$index->getName()][] = \GuzzleHttp\Utils::jsonEncode($data);
+
+        return $this;
     }
 
-    public function addDocuments(IndexInterface $index, array $data)
+    /**
+     * {@inheritdoc}
+     */
+    public function getOperations()
     {
-        // Write to Gally index file. Later, call Gally Bulk API.
-        $indexIdentifier = $index->getIdentifier();
-        $writeData = [];
-        foreach ($data as $documentData) {
-            $writeData[] = $documentData;
-        }
-
-        $this->fileExport->write($indexIdentifier, $writeData, $index->getName(),'documents');
-
-        return parent::addDocuments($index, $data);
+        return $this->bulkData;
     }
 }
