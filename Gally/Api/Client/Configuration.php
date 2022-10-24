@@ -1,6 +1,6 @@
 <?php
 
-namespace Gally\ElasticsuiteBridge\Model\Gally\Api;
+namespace Gally\ElasticsuiteBridge\Gally\Api\Client;
 
 class Configuration
 {

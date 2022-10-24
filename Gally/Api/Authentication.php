@@ -1,6 +1,6 @@
 <?php
 
-namespace Gally\ElasticsuiteBridge\Model\Gally\Api;
+namespace Gally\ElasticsuiteBridge\Gally\Api;
 
 use Gally\Rest\ApiException;
 use GuzzleHttp\Exception\RequestException;
@@ -13,8 +13,8 @@ class Authentication
     private $token = null;
 
     public function __construct(
-        Configuration $config,
-        Curl\Options $curlOptions,
+        \Gally\ElasticsuiteBridge\Gally\Api\Client\Configuration $config,
+        \Gally\ElasticsuiteBridge\Gally\Api\Client\Options $curlOptions,
         Client $client = null,
         LoggerInterface $logger
     ) {

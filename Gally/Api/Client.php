@@ -1,6 +1,6 @@
 <?php
 
-namespace Gally\ElasticsuiteBridge\Model\Gally\Api;
+namespace Gally\ElasticsuiteBridge\Gally\Api;
 
 use Psr\Log\LoggerInterface;
 
@@ -9,16 +9,15 @@ class Client
     private $token = null;
 
     public function __construct(
-        Configuration $configuration,
+        Client\Configuration $configuration,
         Authentication $authentication,
-        Curl\Options $options,
-        LoggerInterface $logger)
-    {
+        Client\Options $options,
+        LoggerInterface $logger){
         $this->configuration  = $configuration;
         $this->authentication = $authentication;
         $this->logger         = $logger;
         $this->curlOptions    = $options;
-        $this->debug          = true;
+        $this->debug          = false;
     }
 
     public function getAuthorizationToken()
@@ -57,6 +56,8 @@ class Client
         } catch (\Exception $e) {
             $this->logger->info(get_class($e) . " when calling {$endpoint}->{$operation}: " . $e->getMessage());
             $this->logger->info($e->getTraceAsString());
+            $this->logger->info("Input was");
+            $this->logger->info(print_r($input, true));
             $result = null;
         }
 

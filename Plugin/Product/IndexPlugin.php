@@ -38,15 +38,15 @@ class IndexPlugin extends AbstractPlugin
 
     public function beforeExecuteFull(\Magento\CatalogSearch\Model\Indexer\Fulltext $subject)
     {
-        //$this->initAttributes();
+        $this->initSourceFields();
     }
 
     /**
-     * Init attributes used in Gally.
+     * Init source fields used in Gally from Magento attributes.
      *
      * @return \Smile\ElasticsuiteCatalog\Model\Eav\Indexer\Fulltext\Datasource\AbstractAttributeData
      */
-    private function initAttributes()
+    private function initSourceFields()
     {
         $attributeCollection = $this->attributeHelper->getAttributeCollection();
 

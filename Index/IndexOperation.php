@@ -3,7 +3,7 @@
 namespace Gally\ElasticsuiteBridge\Index;
 
 use Gally\ElasticsuiteBridge\Gally\CatalogsManager;
-use Gally\ElasticsuiteBridge\Model\Gally\Api\Client;
+use Gally\ElasticsuiteBridge\Gally\Api\Client;
 
 class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
 {
@@ -13,7 +13,7 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
     private $indicesByIdentifier = [];
 
     /**
-     * @var \Gally\ElasticsuiteBridge\Model\Gally\Api\Client
+     * @var \Gally\ElasticsuiteBridge\Gally\Api\Client
      */
     private $client;
 
@@ -36,7 +36,7 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
      * @param \Magento\Framework\ObjectManagerInterface                $objectManager   Object Manager
      * @param \Smile\ElasticsuiteCore\Api\Client\ClientInterface       $esClient        ES Client (not used here)
      * @param \Smile\ElasticsuiteCore\Api\Index\IndexSettingsInterface $indexSettings   Index Settings
-     * @param \Gally\ElasticsuiteBridge\Model\Gally\Api\Client         $client          Gally Client
+     * @param \Gally\ElasticsuiteBridge\Gally\Api\Client         $client          Gally Client
      * @param \Gally\ElasticsuiteBridge\Gally\CatalogsManager          $catalogsManager Gally Catalog Manager
      * @param \Psr\Log\LoggerInterface                                 $logger          Logger
      */

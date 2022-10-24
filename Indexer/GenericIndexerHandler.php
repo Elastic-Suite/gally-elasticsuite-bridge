@@ -4,7 +4,7 @@ namespace Gally\ElasticsuiteBridge\Indexer;
 
 use Gally\ElasticsuiteBridge\Gally\CatalogsManager;
 use Gally\ElasticsuiteBridge\Index\IndexOperation;
-use Gally\ElasticsuiteBridge\Model\Gally\Api\Client;
+use Gally\ElasticsuiteBridge\Gally\Api\Client;
 use Magento\Framework\Indexer\SaveHandler\Batch;
 use Magento\Store\Model\StoreManagerInterface;
 use Smile\ElasticsuiteCore\Api\Index\DataSourceResolverInterfaceFactory;

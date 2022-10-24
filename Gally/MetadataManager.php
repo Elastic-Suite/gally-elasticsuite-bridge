@@ -2,7 +2,7 @@
 
 namespace Gally\ElasticsuiteBridge\Gally;
 
-use Gally\ElasticsuiteBridge\Model\Gally\Api\Client;
+use Gally\ElasticsuiteBridge\Gally\Api\Client;
 
 class MetadataManager
 {

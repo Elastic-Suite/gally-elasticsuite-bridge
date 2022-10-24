@@ -2,7 +2,7 @@
 
 namespace Gally\ElasticsuiteBridge\Gally;
 
-use Gally\ElasticsuiteBridge\Model\Gally\Api\Client;
+use Gally\ElasticsuiteBridge\Gally\Api\Client;
 use Gally\Rest\Api\CatalogApi;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\ScopeInterface;
@@ -15,12 +15,24 @@ class CatalogsManager
      */
     const LOCALE_CODE_CONFIG_XML_PATH = 'general/locale/code';
 
+    /**
+     * @var \Gally\Rest\Model\Catalog[]
+     */
     private $catalogsByCode = [];
 
+    /**
+     * @var \Gally\Rest\Model\LocalizedCatalog[]
+     */
     private $localizedCatalogsByCode = [];
 
+    /**
+     * @var \Gally\Rest\Model\Catalog[]
+     */
     private $catalogsById = [];
 
+    /**
+     * @var \Gally\Rest\Model\LocalizedCatalog[]
+     */
     private $localizedCatalogsById = [];
 
     private $client;
