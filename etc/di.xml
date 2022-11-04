@@ -57,6 +57,10 @@
         <plugin name="rename_category_data" type="Gally\ElasticsuiteBridge\Plugin\Product\Indexer\Fulltext\Datasource\CategoryDataPlugin" sortOrder="10"/>
     </type>
 
+    <type name="Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\InventoryData">
+        <plugin name="rename_is_in_stock_data" type="Gally\ElasticsuiteBridge\Plugin\Product\Indexer\Fulltext\Datasource\InventoryDataPlugin" sortOrder="10" />
+    </type>
+
     <type name="Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext\Datasource\AttributeData">
         <plugin name="export_category_data" type="Gally\ElasticsuiteBridge\Plugin\Category\Indexer\Fulltext\Datasource\AttributeDataPlugin" sortOrder="10"/>
     </type>
