@@ -47,14 +47,17 @@ class AttributeDataPlugin
                 ]
             );
 
+            $categoryData['name'] = $categoryData['name'] ?? 'cat_' . $categoryIdentifier;
+            $categoryConfig = [
+                'category'         => sprintf('@%s', $categoryIdentifier),
+                'catalog'          => sprintf('@%s', $catalogCode),
+                'localizedCatalog' => sprintf('@%s', $localizedCatalogCode),
+                'name'             => is_array($categoryData['name']) ? current($categoryData['name']) : $categoryData['name'],
+            ];
+
             $this->exporter->addCategoryConfiguration(
                 'config_' . $categoryIdentifier . '_' . $localizedCatalogCode,
-                [
-                    'category'         => sprintf('@%s', $categoryIdentifier),
-                    'catalog'          => sprintf('@%s', $catalogCode),
-                    'localizedCatalog' => sprintf('@%s', $localizedCatalogCode),
-                    'name'             => is_array($categoryData['name']) ? current($categoryData['name']) : $categoryData['name'],
-                ]
+                $categoryConfig
             );
         }
 
