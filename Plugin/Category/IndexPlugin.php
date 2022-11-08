@@ -42,7 +42,7 @@ class IndexPlugin extends AbstractPlugin
 
     public function beforeExecuteFull(\Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext $subject)
     {
-        // Re-init product file.
+        // Re-init categories file.
         $this->fileExport->createFile('categories');
 
         $this->initAttributes();

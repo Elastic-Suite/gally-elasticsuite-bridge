@@ -38,6 +38,13 @@ class Exporter
         if ($attribute->getBackendType() === 'decimal') {
             $type = 'float';
         }
+        /*
+         * Handling *some* boolean attributes as boolean source fields.
+         * (see \Gally\ElasticsuiteBridge\Plugin\Gally\SourceField\BooleanFakerExporterPlugin)
+         */
+        if ($attribute->getFrontendInput() === 'boolean') {
+            $type = 'boolean';
+        }
 
         $sourceFieldIdentifier = $entityType . '_' . $attributeCode;
         $this->sourceFieldData[$entityType]['Elasticsuite\Metadata\Model\SourceField'][$sourceFieldIdentifier] = [

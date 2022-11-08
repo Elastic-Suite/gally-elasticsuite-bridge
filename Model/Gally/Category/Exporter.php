@@ -69,8 +69,14 @@ class Exporter
 
     public function __destruct()
     {
-        $this->fileExport->writeYaml('categories', $this->categoryData);
-        $this->fileExport->writeYaml('categories', $this->categoryConfigurationData);
-        $this->fileExport->writeYaml('categories', $this->categoryPositionData);
+        if (!empty($this->categoryData)) {
+            $this->fileExport->writeYaml('categories', $this->categoryData);
+        }
+        if (!empty($this->categoryConfigurationData)) {
+            $this->fileExport->writeYaml('categories', $this->categoryConfigurationData);
+        }
+        if (!empty($this->categoryPositionData)) {
+            $this->fileExport->writeYaml('categories', $this->categoryPositionData);
+        }
     }
 }

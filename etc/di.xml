@@ -49,6 +49,24 @@
     <preference for="Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\AttributeData"
                 type="Gally\ElasticsuiteBridge\Model\Product\Indexer\Fulltext\Datasource\AttributeData"/>
 
+    <!-- make some category attributes behave like pure boolean -->
+    <type name="Gally\ElasticsuiteBridge\Plugin\Category\Indexer\Fulltext\Datasource\BooleanFakerAttributeDataPlugin">
+        <arguments>
+            <argument name="forceBooleanAttributes" xsi:type="array">
+                <item name="is_active" xsi:type="string">is_active</item>
+                <item name="is_displayed_in_autocomplete" xsi:type="string">is_displayed_in_autocomplete</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Gally\ElasticsuiteBridge\Plugin\Gally\SourceField\BooleanFakerExporterPlugin">
+        <arguments>
+            <argument name="forceBooleanAttributes" xsi:type="array">
+                <item name="is_active" xsi:type="string">is_active</item>
+                <item name="is_displayed_in_autocomplete" xsi:type="string">is_displayed_in_autocomplete</item>
+            </argument>
+        </arguments>
+    </type>
+
     <type name="Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\PriceData">
         <plugin name="rename_customer_group" type="Gally\ElasticsuiteBridge\Plugin\Product\Indexer\Fulltext\Datasource\PriceDataPlugin" sortOrder="10"/>
     </type>
@@ -65,6 +83,11 @@
 
     <type name="Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext\Datasource\AttributeData">
         <plugin name="export_category_data" type="Gally\ElasticsuiteBridge\Plugin\Category\Indexer\Fulltext\Datasource\AttributeDataPlugin" sortOrder="10"/>
+        <plugin name="fake_boolean_attributes" type="Gally\ElasticsuiteBridge\Plugin\Category\Indexer\Fulltext\Datasource\BooleanFakerAttributeDataPlugin" sortOrder="20"/>
+    </type>
+
+    <type name="Gally\ElasticsuiteBridge\Model\Gally\SourceField\Exporter">
+        <plugin name="fake_boolean_attributes" type="Gally\ElasticsuiteBridge\Plugin\Gally\SourceField\BooleanFakerExporterPlugin" sortOrder="10" />
     </type>
 
     <!-- Plugin on full reindex to export additional data (source fields) to Gally -->
