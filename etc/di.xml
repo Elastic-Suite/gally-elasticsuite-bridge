@@ -86,6 +86,7 @@
 
     <type name="Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext\Datasource\AttributeData">
         <plugin name="export_category_data" type="Gally\ElasticsuiteBridge\Plugin\Category\Indexer\Fulltext\Datasource\AttributeDataPlugin" sortOrder="10"/>
+        <plugin name="fake_boolean_attributes" type="Gally\ElasticsuiteBridge\Plugin\Category\Indexer\Fulltext\Datasource\BooleanFakerAttributeDataPlugin" sortOrder="20"/>
     </type>
 
     <!-- Plugin on full reindex to export additional data (source fields) to Gally -->

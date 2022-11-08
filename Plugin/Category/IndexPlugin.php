@@ -4,7 +4,6 @@ namespace Gally\ElasticsuiteBridge\Plugin\Category;
 
 use Gally\ElasticsuiteBridge\Gally\SourceFieldManager;
 use Gally\ElasticsuiteBridge\Helper\CategoryAttribute;
-use Gally\ElasticsuiteBridge\Model\Gally\SourceField\Exporter;
 use Gally\ElasticsuiteBridge\Plugin\AbstractPlugin;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Smile\ElasticsuiteCatalog\Helper\AbstractAttribute;
