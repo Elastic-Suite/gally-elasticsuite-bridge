@@ -62,9 +62,9 @@ class Exporter
         $this->categoryConfigurationData['Elasticsuite\Category\Model\Category\Configuration'][$categoryIdentifier] = $data;
     }
 
-    public function addCategoryPositions()
+    public function addCategoryPositions($categoryIdentifier, $data)
     {
-
+        $this->categoryPositionData['Elasticsuite\Category\Model\Category\ProductMerchandising'][$categoryIdentifier] = $data;
     }
 
     public function __destruct()
