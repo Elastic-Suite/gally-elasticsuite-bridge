@@ -1,4 +1,5 @@
-# gally-elasticsuite-bridge
+# ⚠️ Experimental repository.
+
 Bridge between legacy Elasticsuite for Magento and Gally.
 
 # Install
