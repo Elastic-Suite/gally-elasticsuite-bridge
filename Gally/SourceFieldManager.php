@@ -34,7 +34,7 @@ class SourceFieldManager
     private MetadataManager $metadataManager;
 
     /**
-     * @var \Gally\Rest\Model\SourceFieldSourceFieldApi[]
+     * @var \Gally\Rest\Model\SourceFieldSourceFieldRead[]
      */
     private $sourceFieldsById;
 
@@ -44,19 +44,21 @@ class SourceFieldManager
     private $sourceFieldsLabelsByCode;
 
     /**
-     * @var \Gally\Rest\Model\SourceFieldOption[]
+     * @var \Gally\Rest\Model\SourceFieldOptionSourceFieldOptionWrite[]
      */
     private $sourceFieldsOptionById;
 
     /**
-     * @var \Gally\Rest\Model\SourceFieldOption[]
+     * @var \Gally\Rest\Model\SourceFieldOptionSourceFieldOptionWrite[]
      */
     private $sourceFieldsOptionByCode;
 
     /**
-     * @var \Gally\Rest\Model\SourceFieldOptionLabel[]
+     * @var \Gally\Rest\Model\SourceFieldOptionLabelSourceFieldOptionLabelWrite[]
      */
     private $sourceFieldsOptionsLabelsById;
+
+    private int $optionBatchSize = 1000;
 
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -88,6 +90,7 @@ class SourceFieldManager
             'metadata'       => '/metadata/' . $this->metadataManager->getMetadataIdByEntityType($entityType),
             'code'           => $attributeCode,
             'defaultLabel'   => $defaultLabel,
+            'labels'         => [],
             'type'           => $type,
             'isSearchable'   => (bool)$attribute->getIsSearchable(),
             'weight'         => (int)$attribute->getSearchWeight(),
@@ -96,14 +99,14 @@ class SourceFieldManager
             'isSortable'     => (bool)$attribute->getUsedForSortBy(),
             'isUsedForRules' => $attribute->getIsFilterable() || $attribute->getIsFilterableInSearch() || $attribute->getIsUsedForPromoRules(),
         ];
+        $sourceFieldId = null;
         try {
             // If id is found, the field exist on Gally side. We will update the field.
-            $sourceFieldData['id'] = $this->getSourceFieldIdByCode($attributeCode, $entityType);
+            $sourceFieldId = $this->getSourceFieldIdByCode($attributeCode, $entityType);
         } catch (\Exception $exception) {
             // Do nothing, it means we will create the field instead of updating it.
         }
 
-        $sourceField = $this->createSourceField($sourceFieldData);
 
         foreach ($this->storeManager->getStores() as $store) {
             $attribute->setStoreId($store->getId());
@@ -114,14 +117,13 @@ class SourceFieldManager
             }
 
             $sourceFieldLabelData = [
-                'sourceField' => '/source_fields/' . $sourceField->getId() ,
-                'catalog'     => '/localized_catalogs/' . $localizedCatalogId,
+                'localizedCatalog'     => '/localized_catalogs/' . $localizedCatalogId,
                 'label'       => $label,
             ];
 
             try {
                 // If id is found, the field exist on Gally side. We will update the field.
-                $sourceFieldLabelData['id'] = $this->getSourceFieldLabelIdByCode(
+                $sourceFieldLabelData['id'] = '/source_field_labels/' . $this->getSourceFieldLabelIdByCode(
                     $attributeCode,
                     $entityType,
                     $this->catalogsManager->getLocalizedCatalogIdByStoreCode($store->getCode())
@@ -130,12 +132,16 @@ class SourceFieldManager
                 // Do nothing, it means we will create the label instead of updating it.
             }
 
-            $this->createSourceFieldLabel($sourceFieldLabelData);
+            $sourceFieldData['labels'][] = $sourceFieldLabelData;
         }
+
+        $sourceField = $this->createSourceField($sourceFieldId, $sourceFieldData);
 
         if ($attribute->usesSource()) {
             // Options stored in DB tables.
             foreach ($this->storeManager->getStores() as $store) {
+                $currentBulkSize = 0;
+                $currentBulk = [];
                 $localizedCatalogId = $this->catalogsManager->getLocalizedCatalogIdByStoreCode($store->getCode());
                 if (is_a($attribute->getSource(), 'Magento\Eav\Model\Entity\Attribute\Source\Table')) {
 
@@ -150,9 +156,10 @@ class SourceFieldManager
                     foreach ($options as $option) {
                         $optionCode            = (string)$option->getId();
                         $sourceFieldOptionData = [
-                            'sourceField' => '/source_fields/' . $sourceField->getId(),
                             'code'        => $optionCode,
                             'position'    => (int)$option->getSortOrder(),
+                            'labels'      => [],
+                            'defaultLabel'=> $option->getValue(),
                         ];
 
                         try {
@@ -162,22 +169,34 @@ class SourceFieldManager
                             // Do nothing, it means we will create the option instead of updating it.
                         }
 
-                        $sourceFieldOption = $this->createSourceFieldOption($sourceFieldOptionData);
-
                         $sourceFieldOptionLabelData = [
-                            'sourceFieldOption' => '/source_field_options/' . $sourceFieldOption->getId(),
-                            'catalog'           => '/localized_catalogs/' . $localizedCatalogId,
+                            'localizedCatalog'           => '/localized_catalogs/' . $localizedCatalogId,
                             'label'             => $option->getValue(),
                         ];
 
-                        try {
-                            // If id is found, the field exist on Gally side. We will update the field.
-                            $sourceFieldOptionLabelData['id'] = $this->getSourceFieldOptionLabelId($localizedCatalogId, $sourceFieldOption->getId());
-                        } catch (\Exception $exception) {
-                            // Do nothing, it means we will create the option instead of updating it.
+                        if (array_key_exists('id', $sourceFieldOptionData)) {
+                            $sourceFieldOptionLabelData['sourceFieldOption'] = '/source_fields/' . $sourceFieldOptionData['id'];
+                            try {
+                                // If id is found, the field exist on Gally side. We will update the field.
+                                $sourceFieldOptionLabelData['id'] = $this->getSourceFieldOptionLabelId($localizedCatalogId, $sourceFieldOptionData['id']);
+                            } catch (\Exception $exception) {
+                                // Do nothing, it means we will create the option instead of updating it.
+                            }
                         }
 
-                        $this->createSourceFieldOptionLabel($sourceFieldOptionLabelData);
+                        $sourceFieldOptionData['labels'][] = $sourceFieldOptionLabelData;
+                        $currentBulk[] = $sourceFieldOptionData;
+                        $currentBulkSize++;
+                        if ($currentBulkSize > $this->optionBatchSize) {
+                            $this->client->query(
+                                \Gally\Rest\Api\SourceFieldApi::class,
+                                'addOptionsSourceFieldItem',
+                                $sourceField->getId(),
+                                $currentBulk
+                            );
+                            $currentBulkSize = 0;
+                            $currentBulk = [];
+                        }
                     }
                 } else {
                     // Options from source_model.
@@ -188,9 +207,10 @@ class SourceFieldManager
                             $optionCode = $attributeCode . "_" . $key;
                         }
                         $sourceFieldOptionData = [
-                            'sourceField' => '/source_fields/' . $sourceField->getId(),
                             'code'        => $optionCode,
                             'position'    => (int)$key,
+                            'labels'      => [],
+                            'defaultLabel'=> (string)$option['label'],
                         ];
 
                         try {
@@ -200,24 +220,43 @@ class SourceFieldManager
                             // Do nothing, it means we will create the option instead of updating it.
                         }
 
-                        $sourceFieldOption = $this->createSourceFieldOption($sourceFieldOptionData);
 
                         $sourceFieldOptionLabelData = [
-                            'sourceFieldOption' => '/source_field_options/' . $sourceFieldOption->getId(),
-                            'catalog'           => '/localized_catalogs/' . $localizedCatalogId,
+                            'localizedCatalog'           => '/localized_catalogs/' . $localizedCatalogId,
                             'label'             => (string)$option['label'],
                         ];
 
-                        try {
-                            // If id is found, the field exist on Gally side. We will update the field.
-                            $sourceFieldOptionLabelData['id'] = $this->getSourceFieldOptionLabelId($localizedCatalogId, $sourceFieldOption->getId());
-                        } catch (\Exception $exception) {
-                            // Do nothing, it means we will create the option instead of updating it.
+                        if (array_key_exists('id', $sourceFieldOptionData)) {
+                            $sourceFieldOptionLabelData['sourceFieldOption'] = '/source_fields/' . $sourceFieldOptionData['id'];
+                            try {
+                                // If id is found, the field exist on Gally side. We will update the field.
+                                $sourceFieldOptionLabelData['id'] = $this->getSourceFieldOptionLabelId($localizedCatalogId, $sourceFieldOptionData['id']);
+                            } catch (\Exception $exception) {
+                                // Do nothing, it means we will create the option instead of updating it.
+                            }
                         }
-
-                        $this->createSourceFieldOptionLabel($sourceFieldOptionLabelData);
-
+                        $sourceFieldOptionData['labels'][] = $sourceFieldOptionLabelData;
+                        $currentBulk[] = $sourceFieldOptionData;
+                        $currentBulkSize++;
+                        if ($currentBulkSize > $this->optionBatchSize) {
+                            $this->client->query(
+                                \Gally\Rest\Api\SourceFieldApi::class,
+                                'addOptionsSourceFieldItem',
+                                $sourceField->getId(),
+                                $currentBulk
+                            );
+                            $currentBulkSize = 0;
+                            $currentBulk = [];
+                        }
                     }
+                }
+                if ($currentBulk) {
+                    $this->client->query(
+                        \Gally\Rest\Api\SourceFieldApi::class,
+                        'addOptionsSourceFieldItem',
+                        $sourceField->getId(),
+                        $currentBulk
+                    );
                 }
             }
         }
@@ -261,15 +300,35 @@ class SourceFieldManager
 
     private function getSourceFields()
     {
+        $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/elasticsuite-bridge.log');
+        $logger = new \Zend_Log();
+        $logger->addWriter($writer);
+        $logger->info('Load source field');
+        $start = microtime(true);
         $curPage = 1;
 
         do {
-            /** @var \Gally\Rest\Model\SourceFieldSourceFieldApi[] $sourceFields */
+            /** @var \Gally\Rest\Model\SourceFieldSourceFieldRead[] $sourceFields */
             $sourceFields = $this->client->query(
                 \Gally\Rest\Api\SourceFieldApi::class,
                 'getSourceFieldCollection',
-                currentPage: $curPage,
-                pageSize:    30
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                $curPage,
+                30,
+                null
             );
 
             foreach ($sourceFields as $sourceField) {
@@ -287,13 +346,18 @@ class SourceFieldManager
             $sourceFieldLabels = $this->client->query(
                 \Gally\Rest\Api\SourceFieldLabelApi::class,
                 'getSourceFieldLabelCollection',
-                currentPage: $curPage,
-                pageSize:    30
+                $localizedCatalog = null,
+                $localizedCatalog2 = null,
+                $sourceField = null,
+                $sourceField2 = null,
+                $currentPage = $curPage,
+                $pageSize = 30,
+                $pagination = null
             );
 
             foreach ($sourceFieldLabels as $sourceFieldLabel) {
                 $sourceFieldId = (int) str_replace('/source_fields/', '', $sourceFieldLabel->getSourceField());
-                $catalogId     = (int) str_replace('/localized_catalogs/', '', $sourceFieldLabel->getCatalog());
+                $catalogId     = (int) str_replace('/localized_catalogs/', '', $sourceFieldLabel->getLocalizedCatalog());
                 $sourceFieldCode = $this->sourceFieldsById[$sourceFieldId]->getCode();
                 $metadata   = str_replace('/metadata/', '', $this->sourceFieldsById[$sourceFieldId]->getMetadata());
                 $entityType = $this->metadataManager->getMetadataEntityTypeById($metadata);
@@ -304,12 +368,16 @@ class SourceFieldManager
 
         $curPage = 1;
         do {
-            /** @var \Gally\Rest\Model\SourceFieldOption[] $sourceFieldOptions */
+            /** @var \Gally\Rest\Model\SourceFieldOptionSourceFieldOptionWrite[] $sourceFieldOptions */
             $sourceFieldOptions = $this->client->query(
                 \Gally\Rest\Api\SourceFieldOptionApi::class,
                 'getSourceFieldOptionCollection',
-                currentPage: $curPage,
-                pageSize:    30
+                $sourceField = null,
+                $sourceField2 = null,
+                $orderPosition = null,
+                $currentPage = $curPage,
+                $pageSize = 30,
+                $pagination = null
             );
 
             foreach ($sourceFieldOptions as $sourceFieldOption) {
@@ -322,47 +390,59 @@ class SourceFieldManager
 
         $curPage = 1;
         do {
-            /** @var \Gally\Rest\Model\SourceFieldOptionLabel[] $sourceFieldOptionsLabels */
+            /** @var \Gally\Rest\Model\SourceFieldOptionLabelSourceFieldOptionLabelWrite[] $sourceFieldOptionsLabels */
             $sourceFieldOptionsLabels = $this->client->query(
                 \Gally\Rest\Api\SourceFieldOptionLabelApi::class,
                 'getSourceFieldOptionLabelCollection',
-                currentPage: $curPage,
-                pageSize:    30
+                $localizedCatalog = null,
+                $localizedCatalog2 = null,
+                $sourceFieldOption = null,
+                $sourceFieldOption2 = null,
+                $sourceFieldOptionSourceField = null,
+                $sourceFieldOptionSourceField2 = null,
+                $orderSourceFieldOptionPosition = null,
+                $currentPage = $curPage,
+                $pageSize = 30,
+                $pagination = null
             );
 
             foreach ($sourceFieldOptionsLabels as $sourceFieldOptionLabel) {
                 $sourceFieldOptionId   = (int) str_replace('/source_field_options/', '', $sourceFieldOptionLabel->getSourceFieldOption());
-                $catalogId             = (int) str_replace('/localized_catalogs/', '', $sourceFieldOptionLabel->getCatalog());
+                $catalogId             = (int) str_replace('/localized_catalogs/', '', $sourceFieldOptionLabel->getLocalizedCatalog());
                 $this->sourceFieldsOptionsLabelsById[$catalogId][$sourceFieldOptionId] = $sourceFieldOptionLabel;
             }
             $curPage++;
         } while (count($sourceFieldOptionsLabels) > 0);
+
+        $end = microtime(true) - $start;
+        $logger->info('all source field loaded on : ' . $end);
     }
 
     /**
+     * @param $sourceFieldId
      * @param $data
      *
-     * @return \Gally\Rest\Model\SourceFieldSourceFieldApi|null
+     * @return \Gally\Rest\Model\SourceFieldSourceFieldRead|null
      */
-    private function createSourceField($data)
+    private function createSourceField($sourceFieldId, $data)
     {
-        $input = new \Gally\Rest\Model\SourceFieldSourceFieldApi($data);
+        $input = new \Gally\Rest\Model\SourceFieldSourceFieldRead($data);
         if (!$input->valid()) {
             throw new \LogicException(
                 "Missing properties for " . get_class($input) . " : " . implode(",", $input->listInvalidProperties())
             );
         }
 
-        if ($input->getId()) {
-            /** @var \Gally\Rest\Model\SourceFieldSourceFieldApi $sourceField */
+        if ($sourceFieldId) {
+            /** @var \Gally\Rest\Model\SourceFieldSourceFieldRead $sourceField */
             $sourceField = $this->client->query(
                 \Gally\Rest\Api\SourceFieldApi::class,
-                'patchSourceFieldItem',
-                $input->getId(),
+                'putSourceFieldItem',
+                $sourceFieldId,
                 $input
             );
         } else {
-            /** @var \Gally\Rest\Model\SourceFieldSourceFieldApi $sourceField */
+            /** @var \Gally\Rest\Model\SourceFieldSourceFieldRead $sourceField */
             $sourceField = $this->client->query(
                 \Gally\Rest\Api\SourceFieldApi::class,
                 'postSourceFieldCollection',
@@ -410,11 +490,11 @@ class SourceFieldManager
     /**
      * @param $data
      *
-     * @return \Gally\Rest\Model\SourceFieldOption|null
+     * @return \Gally\Rest\Model\SourceFieldOptionSourceFieldOptionWrite|null
      */
     private function createSourceFieldOption($data)
     {
-        $input = new \Gally\Rest\Model\SourceFieldOption($data);
+        $input = new \Gally\Rest\Model\SourceFieldOptionSourceFieldOptionWrite($data);
         if (!$input->valid()) {
             throw new \LogicException(
                 "Missing properties for " . get_class($input) . " : " . implode(",", $input->listInvalidProperties())
@@ -422,7 +502,7 @@ class SourceFieldManager
         }
 
         if ($input->getId()) {
-            /** @var \Gally\Rest\Model\SourceFieldOption $sourceFieldOption */
+            /** @var \Gally\Rest\Model\SourceFieldOptionSourceFieldOptionWrite $sourceFieldOption */
             $sourceFieldOption = $this->client->query(
                 \Gally\Rest\Api\SourceFieldOptionApi::class,
                 'patchSourceFieldOptionItem',
@@ -430,7 +510,7 @@ class SourceFieldManager
                 $input
             );
         } else {
-            /** @var \Gally\Rest\Model\SourceFieldOption $sourceFieldOption */
+            /** @var \Gally\Rest\Model\SourceFieldOptionSourceFieldOptionWrite $sourceFieldOption */
             $sourceFieldOption = $this->client->query(
                 \Gally\Rest\Api\SourceFieldOptionApi::class,
                 'postSourceFieldOptionCollection',
@@ -444,11 +524,11 @@ class SourceFieldManager
     /**
      * @param $data
      *
-     * @return \Gally\Rest\Model\SourceFieldOptionLabel|null
+     * @return \Gally\Rest\Model\SourceFieldOptionLabelSourceFieldOptionLabelWrite|null
      */
     private function createSourceFieldOptionLabel($data)
     {
-        $input = new \Gally\Rest\Model\SourceFieldOptionLabel($data);
+        $input = new \Gally\Rest\Model\SourceFieldOptionLabelSourceFieldOptionLabelWrite($data);
         if (!$input->valid()) {
             throw new \LogicException(
                 "Missing properties for " . get_class($input) . " : " . implode(",", $input->listInvalidProperties())
@@ -456,7 +536,7 @@ class SourceFieldManager
         }
 
         if ($input->getId()) {
-            /** @var \Gally\Rest\Model\SourceFieldOptionLabel $sourceFieldLabel */
+            /** @var \Gally\Rest\Model\SourceFieldOptionLabelSourceFieldOptionLabelWrite $sourceFieldLabel */
             $sourceFieldOptionLabel = $this->client->query(
                 \Gally\Rest\Api\SourceFieldOptionLabelApi::class,
                 'patchSourceFieldOptionLabelItem',
@@ -464,7 +544,7 @@ class SourceFieldManager
                 $input
             );
         } else {
-            /** @var \Gally\Rest\Model\SourceFieldOptionLabel $sourceFieldLabel */
+            /** @var \Gally\Rest\Model\SourceFieldOptionLabelSourceFieldOptionLabelWrite $sourceFieldLabel */
             $sourceFieldOptionLabel = $this->client->query(
                 \Gally\Rest\Api\SourceFieldOptionLabelApi::class,
                 'postSourceFieldOptionLabelCollection',

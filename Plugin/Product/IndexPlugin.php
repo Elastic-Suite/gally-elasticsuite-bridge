@@ -49,12 +49,21 @@ class IndexPlugin extends AbstractPlugin
     private function initSourceFields()
     {
         $attributeCollection = $this->attributeHelper->getAttributeCollection();
+        $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/elasticsuite-bridge.log');
+        $logger = new \Zend_Log();
+        $logger->addWriter($writer);
+        $logger->info('[Product] Prepare source field to uploaded');
+        $start = microtime(true);
 
-        /** @var \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute */
-        foreach ($attributeCollection as $attribute) {
-            if ($this->canIndexAttribute($attribute)) {
-                $this->sourceFieldManager->addSourceField($attribute, 'product');
-            }
-        }
+//        /** @var \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute */
+//        foreach ($attributeCollection as $attribute) {
+//            $logger->info('[Product] source field : ' . $attribute->getName());
+//
+//            if ($this->canIndexAttribute($attribute)) {
+//                $this->sourceFieldManager->addSourceField($attribute, 'product');
+//            }
+//        }
+        $end = microtime(true) - $start;
+        $logger->info('[Product] all source field uploaded on : ' . $end);
     }
 }

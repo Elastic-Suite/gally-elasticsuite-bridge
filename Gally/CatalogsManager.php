@@ -78,7 +78,13 @@ class CatalogsManager
 
     public function prepareCatalogs()
     {
+        $writer = new \Zend_Log_Writer_Stream(BP . '/var/log/elasticsuite-bridge.log');
+        $logger = new \Zend_Log();
+        $logger->addWriter($writer);
+        $logger->info('Prepare catalog');
+        $start = microtime(true);
         foreach ($this->storeManager->getWebsites() as $website) {
+            $logger->info('load store : ' . $website->getName());
             $data = [
                 'code' => $website->getCode(),
                 'name' => $website->getName(),
@@ -99,6 +105,8 @@ class CatalogsManager
                 $this->createLocalizedCatalogIfNotExists($data);
             }
         }
+        $end = microtime(true) - $start;
+        $logger->info('all stores loaded on : ' . $end);
     }
 
     private function getCatalogs()

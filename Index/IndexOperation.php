@@ -62,7 +62,7 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
     {
         $indexData = [
             'entityType' => $indexIdentifier,
-            'catalog'    => $this->catalogsManager->getLocalizedCatalogIdByStoreCode($store->getCode()),
+            'localizedCatalog'    => (string) $this->catalogsManager->getLocalizedCatalogIdByStoreCode($store->getCode()),
         ];
 
         /** @var \Gally\Rest\Model\IndexCreate $index */
@@ -127,8 +127,8 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
         $index = $this->client->query(
             \Gally\Rest\Api\IndexApi::class,
             'installIndexItem',
-            name: $index->getName(),
-            index: []
+            $index->getName(),
+            []
         );
 
         return $index;
@@ -143,8 +143,8 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
         $index = $this->client->query(
             \Gally\Rest\Api\IndexApi::class,
             'refreshIndexItem',
-            name: $index->getName(),
-            index: []
+            $index->getName(),
+            []
         );
 
         return $index;

@@ -32,7 +32,7 @@ class Authentication
             'email'    => $this->config->getEmail(),
             'password' => $this->config->getPassword(),
         ];
-        $httpBody = \GuzzleHttp\Utils::jsonEncode($body);
+        $httpBody = json_encode($body);
 
         $request = new Request(
             'POST',
@@ -56,7 +56,7 @@ class Authentication
         }
 
         try {
-            $response = \GuzzleHttp\Utils::jsonDecode($responseJson->getBody()->getContents());
+            $response = json_decode($responseJson->getBody()->getContents());
             return (string) $response->token;
         } catch (\Exception $e) {
             throw new \LogicException(

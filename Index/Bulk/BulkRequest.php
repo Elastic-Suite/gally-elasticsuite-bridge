@@ -19,7 +19,7 @@ class BulkRequest extends \Smile\ElasticsuiteCore\Index\Bulk\BulkRequest
      */
     public function addDocument(IndexInterface $index, $docId, array $data)
     {
-        $this->bulkData[$index->getName()][] = \GuzzleHttp\Utils::jsonEncode($data);
+        $this->bulkData[$index->getName()][] = json_encode($data);
 
         return $this;
     }

@@ -21,14 +21,14 @@
     <!-- We will create "catalogs" and "localizedCatalogs" according to index dimensions -->
     <virtualType name="catalogCategorySearchIndexHandler" type="\Gally\ElasticsuiteBridge\Indexer\GenericIndexerHandler">
         <arguments>
-            <argument name="indexName" xsi:type="string">catalog_category</argument>
+            <argument name="indexName" xsi:type="string">category</argument>
             <argument name="typeName" xsi:type="string">category</argument>
         </arguments>
     </virtualType>
 
     <virtualType name="catalogProductSearchIndexHandler" type="\Gally\ElasticsuiteBridge\Indexer\GenericIndexerHandler">
         <arguments>
-            <argument name="indexName" xsi:type="string">catalog_product</argument>
+            <argument name="indexName" xsi:type="string">product</argument>
             <argument name="typeName" xsi:type="string">product</argument>
         </arguments>
     </virtualType>
