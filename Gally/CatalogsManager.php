@@ -99,6 +99,7 @@ class CatalogsManager
                     "code"      => $store->getCode(),
                     "locale"    => $this->getLocaleCode($store),
                     "isDefault" => $store->isDefault(),
+                    "currency"  => $store->getCurrentCurrency()->getCode(),
                     "catalog"   => "/catalogs/" . $catalog->getId(),
                 ];
 

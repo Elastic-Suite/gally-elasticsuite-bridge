@@ -11,27 +11,27 @@ class SourceFieldManager
     /**
      * @var \Gally\ElasticsuiteBridge\Gally\CatalogsManager
      */
-    private CatalogsManager $catalogsManager;
+    private $catalogsManager;
 
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
      */
-    private StoreManagerInterface $storeManager;
+    private $storeManager;
 
     /**
      * @var \Magento\Eav\Model\ResourceModel\Entity\Attribute\Option\CollectionFactory
      */
-    private OptionCollectionFactory $attrOptionCollectionFactory;
+    private $attrOptionCollectionFactory;
 
     /**
      * @var \Gally\ElasticsuiteBridge\Gally\Api\Client
      */
-    private Client $client;
+    private $client;
 
     /**
      * @var \Gally\ElasticsuiteBridge\Gally\MetadataManager
      */
-    private MetadataManager $metadataManager;
+    private $metadataManager;
 
     /**
      * @var \Gally\Rest\Model\SourceFieldSourceFieldRead[]
@@ -58,7 +58,7 @@ class SourceFieldManager
      */
     private $sourceFieldsOptionsLabelsById;
 
-    private int $optionBatchSize = 1000;
+    private $optionBatchSize = 100;
 
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -170,7 +170,7 @@ class SourceFieldManager
                         }
 
                         $sourceFieldOptionLabelData = [
-                            'localizedCatalog'           => '/localized_catalogs/' . $localizedCatalogId,
+                            'localizedCatalog'  => '/localized_catalogs/' . $localizedCatalogId,
                             'label'             => $option->getValue(),
                         ];
 

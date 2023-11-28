@@ -80,7 +80,14 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
         ];
 
         // Not needed for Gally. Just to avoid exception.
-        $createIndexParams += $this->indicesConfiguration['catalog_product'];
+        switch ($indexIdentifier) {
+            case "product":
+                $createIndexParams += $this->indicesConfiguration['catalog_product'];
+                break;
+            case "category":
+                $createIndexParams += $this->indicesConfiguration['catalog_category'];
+                break;
+        }
 
         $index = $this->objectManager->create('\Smile\ElasticsuiteCore\Api\Index\IndexInterface', $createIndexParams);
 
