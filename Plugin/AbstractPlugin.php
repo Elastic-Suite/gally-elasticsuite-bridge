@@ -46,6 +46,21 @@ abstract class AbstractPlugin
         // 'price' attribute is declared as nested field into the indices file.
         $canIndex = $attribute->getBackendType() != 'static' && $attribute->getAttributeCode() !== 'price';
         $canIndex = $canIndex && !(in_array($attribute->getAttributeCode(), self::FORBIDDEN_FIELD_NAMES));
+        $canIndex = $canIndex
+            && in_array(
+                $attribute->getAttributeCode(),
+                [
+//                    'name',
+                    'path',
+                    'main_category_id',
+                    'description',
+                    'short_description',
+                    'cnet_description',
+                    'cnet_key_selling_points',
+                    'category_ids',
+//                    'image',
+                ]
+            );
 
         if ($canIndex && $attribute->getBackendModel()) {
             foreach ($this->indexedBackendModels as $indexedBackendModel) {

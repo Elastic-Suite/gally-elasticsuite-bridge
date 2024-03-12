@@ -94,16 +94,18 @@ class CatalogsManager
 
             /** @var \Magento\Store\Model\Store $store */
             foreach ($website->getStores() as $store) {
-                $data = [
-                    "name"      => $store->getName(),
-                    "code"      => $store->getCode(),
-                    "locale"    => $this->getLocaleCode($store),
-                    "isDefault" => $store->isDefault(),
-                    "currency"  => $store->getCurrentCurrency()->getCode(),
-                    "catalog"   => "/catalogs/" . $catalog->getId(),
-                ];
 
-                $this->createLocalizedCatalogIfNotExists($data);
+                    $data = [
+                        "name"      => $store->getName(),
+                        "code"      => $store->getCode(),
+                        "locale"    => $this->getLocaleCode($store),
+                        "isDefault" => $store->isDefault(),
+                        "currency"  => $store->getCurrentCurrency()->getCode(),
+                        "catalog"   => "/catalogs/" . $catalog->getId(),
+                    ];
+
+                    $this->createLocalizedCatalogIfNotExists($data);
+
             }
         }
         $end = microtime(true) - $start;

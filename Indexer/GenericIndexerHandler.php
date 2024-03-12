@@ -105,6 +105,7 @@ class GenericIndexerHandler extends \Smile\ElasticsuiteCore\Indexer\GenericIndex
             }
 
             $batchSize = $this->indexOperation->getBatchIndexingSize();
+            $type      = $index->getType($this->typeName);
 
             foreach ($this->batch->getItems($documents, $batchSize) as $batchDocuments) {
                 foreach ($this->getDatasources() as $datasource) {
@@ -114,7 +115,7 @@ class GenericIndexerHandler extends \Smile\ElasticsuiteCore\Indexer\GenericIndex
                 }
 
                 if (!empty($batchDocuments)) {
-                    $bulk = $this->indexOperation->createBulk()->addDocuments($index, $batchDocuments);
+                    $bulk = $this->indexOperation->createBulk()->addDocuments($index, $type, $batchDocuments);
                     $this->indexOperation->executeBulk($bulk);
                 }
             }

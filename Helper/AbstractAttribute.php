@@ -2,6 +2,7 @@
 
 namespace Gally\ElasticsuiteBridge\Helper;
 
+use Magento\Catalog\Api\Data\EavAttributeInterface;
 use Magento\Catalog\Model\ResourceModel\Eav\AttributeFactory;
 use Magento\Framework\App\Helper\Context;
 
@@ -82,9 +83,9 @@ class AbstractAttribute extends \Smile\ElasticsuiteCatalog\Helper\AbstractAttrib
      *
      * @param int $attributeId Product attribute id.
      *
-     * @return \Magento\Catalog\Api\Data\EavAttributeInterface
+     * @return EavAttributeInterface
      */
-    private function getAttributeById($attributeId)
+    protected function getAttributeById($attributeId)
     {
         if (!isset($this->attributes[$attributeId])) {
             /**
@@ -106,7 +107,7 @@ class AbstractAttribute extends \Smile\ElasticsuiteCatalog\Helper\AbstractAttrib
      *
      * @return string
      */
-    private function getAttributeCodeById($attributeId)
+    protected function getAttributeCodeById($attributeId)
     {
         if (!isset($this->attributesCode[$attributeId])) {
             /**

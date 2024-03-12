@@ -2,6 +2,7 @@
 
 namespace Gally\ElasticsuiteBridge\Gally\Api;
 
+use Gally\Rest\Configuration;
 use Psr\Log\LoggerInterface;
 
 class Client
@@ -30,7 +31,7 @@ class Client
     }
 
     public function query($endpoint, $operation, ...$input) {
-        $config = \Gally\Rest\Configuration::getDefaultConfiguration()->setApiKey(
+        $config = Configuration::getDefaultConfiguration()->setApiKey(
             'Authorization',
             $this->getAuthorizationToken()
         )->setApiKeyPrefix(
@@ -54,6 +55,7 @@ class Client
                 $this->logger->info(print_r($result, true));
             }
         } catch (\Exception $e) {
+            print_r($e->getMessage());
             $this->logger->info(get_class($e) . " when calling {$endpoint}->{$operation}: " . $e->getMessage());
             $this->logger->info($e->getTraceAsString());
             $this->logger->info("Input was");

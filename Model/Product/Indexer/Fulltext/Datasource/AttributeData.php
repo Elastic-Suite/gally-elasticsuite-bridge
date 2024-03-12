@@ -92,6 +92,24 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
             $data['id'] = $productId;
         }
 
+
+//        var_dump($indexData);
+
+        foreach ($indexData as $productId => &$data) {
+            if (array_key_exists('name', $data)) {
+                $data['name'] = array_map("utf8_encode", $data['name']);
+            }
+            if (array_key_exists('description', $data)) {
+                $data['description'] = array_map("utf8_encode", $data['description']);
+            }
+            if (array_key_exists('cnet_description', $data)) {
+                $data['cnet_description'] = array_map("utf8_encode", $data['cnet_description']);
+            }
+        }
+
+//        var_dump($indexData);
+//        die();
+
         return $this->filterCompositeProducts($indexData);
     }
 

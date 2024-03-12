@@ -5,17 +5,18 @@ namespace Gally\ElasticsuiteBridge\Plugin\Product;
 use Gally\ElasticsuiteBridge\Gally\SourceFieldManager;
 use Gally\ElasticsuiteBridge\Helper\ProductAttribute;
 use Gally\ElasticsuiteBridge\Plugin\AbstractPlugin;
+use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use Magento\CatalogSearch\Model\Indexer\Fulltext;
+use Magento\TestFramework\Inspection\Exception;
+use Smile\ElasticsuiteCatalog\Helper\AbstractAttribute;
+use Smile\ElasticsuiteCatalog\Model\Eav\Indexer\Fulltext\Datasource\AbstractAttributeData;
 
 class IndexPlugin extends AbstractPlugin
 {
-    /**
-     * @var \Smile\ElasticsuiteCatalog\Helper\AbstractAttribute
-     */
+    /** @var AbstractAttribute */
     protected $attributeHelper;
 
-    /**
-     * @var \Gally\ElasticsuiteBridge\Gally\SourceFieldManager
-     */
+    /** @var SourceFieldManager */
     private $sourceFieldManager;
 
     /**
@@ -36,7 +37,7 @@ class IndexPlugin extends AbstractPlugin
         parent::__construct($indexedBackendModels);
     }
 
-    public function beforeExecuteFull(\Magento\CatalogSearch\Model\Indexer\Fulltext $subject)
+    public function beforeExecuteFull(Fulltext $subject)
     {
         $this->initSourceFields();
     }
@@ -44,7 +45,7 @@ class IndexPlugin extends AbstractPlugin
     /**
      * Init source fields used in Gally from Magento attributes.
      *
-     * @return \Smile\ElasticsuiteCatalog\Model\Eav\Indexer\Fulltext\Datasource\AbstractAttributeData
+     * @return AbstractAttributeData
      */
     private function initSourceFields()
     {
@@ -55,7 +56,7 @@ class IndexPlugin extends AbstractPlugin
         $logger->info('[Product] Prepare source field to uploaded');
         $start = microtime(true);
 
-        /** @var \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute */
+        /** @var Attribute $attribute */
         foreach ($attributeCollection as $attribute) {
             $logger->info('[Product] source field : ' . $attribute->getName());
 
@@ -63,6 +64,8 @@ class IndexPlugin extends AbstractPlugin
                 $this->sourceFieldManager->addSourceField($attribute, 'product');
             }
         }
+        // Run last bulk if not empty.
+        $this->sourceFieldManager->runOptionBulk('product');
         $end = microtime(true) - $start;
         $logger->info('[Product] all source field uploaded on : ' . $end);
     }

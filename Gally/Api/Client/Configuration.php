@@ -8,8 +8,9 @@ class Configuration
 
     private $password = "apassword";
 
-    //private $host = "https://ec2-34-243-11-163.eu-west-1.compute.amazonaws.com/";
-    private $host = "https://gally.localhost/";
+    private $host = "https://llm.localhost/";
+//    private $host = "https://ec2-34-245-123-117.eu-west-1.compute.amazonaws.com/"; // Gally llm
+//    private $host = "https://ec2-3-252-126-71.eu-west-1.compute.amazonaws.com/"; // Gally llm gpu
 
     public function getEmail()
     {
