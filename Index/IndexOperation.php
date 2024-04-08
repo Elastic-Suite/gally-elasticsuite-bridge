@@ -203,7 +203,7 @@ class IndexOperation extends BaseIndexOperation
         }
 
         /** @var IndexDetails $index */
-        $index = $this->client->query(IndexApi::class, 'refreshIndexItem', name: $index->getName(), index: []);
+        $index = $this->client->query(IndexApi::class, 'refreshIndexItem', $index->getName(), []);
 
         return $index;
     }
@@ -218,7 +218,7 @@ class IndexOperation extends BaseIndexOperation
         }
 
         /** @var IndexDetails $index */
-        $index = $this->client->query(IndexApi::class, 'installIndexItem', name: $index->getName(), index: []);
+        $index = $this->client->query(IndexApi::class, 'installIndexItem', $index->getName(), []);
 
         return $index;
     }
