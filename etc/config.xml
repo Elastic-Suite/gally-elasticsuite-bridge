@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <gally_bridge>
+            <api>
+                <host>https://gally.localhost/</host>
+<!--                <host>https://ec2-34-245-123-117.eu-west-1.compute.amazonaws.com/</host> Gally llm -->
+<!--                <host>https://ec2-3-252-126-71.eu-west-1.compute.amazonaws.com/</host>   Gally llm gpu-->
+                <email>admin@example.com</email>
+                <password>apassword</password>
+            </api>
+        </gally_bridge>
+    </default>
+</config>

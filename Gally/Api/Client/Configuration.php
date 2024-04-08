@@ -1,27 +1,32 @@
 <?php
+declare(strict_types=1);
 
 namespace Gally\ElasticsuiteBridge\Gally\Api\Client;
 
+use Magento\Framework\App\Config\ScopeConfigInterface;
+
 class Configuration
 {
-    private $email = "admin@example.com";
-    private $password = "apassword";
-    private $host = "https://llm.localhost/";
-//    private $host = "https://ec2-34-245-123-117.eu-west-1.compute.amazonaws.com/"; // Gally llm
-//    private $host = "https://ec2-3-252-126-71.eu-west-1.compute.amazonaws.com/"; // Gally llm gpu
+    /** @var ScopeConfigInterface */
+    private $config;
+
+    public function __construct(ScopeConfigInterface $config)
+    {
+        $this->config = $config;
+    }
 
     public function getEmail(): string
     {
-        return $this->email;
+        return $this->config->getValue('gally_bridge/api/email');
     }
 
     public function getPassword(): string
     {
-        return $this->password;
+        return $this->config->getValue('gally_bridge/api/password');
     }
 
     public function getHost(): string
     {
-        return $this->host;
+        return $this->config->getValue('gally_bridge/api/host');
     }
 }
