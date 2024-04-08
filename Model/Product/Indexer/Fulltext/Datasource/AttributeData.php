@@ -88,6 +88,13 @@ class AttributeData extends BaseAttributeData implements DatasourceInterface
             $data['id'] = $productId;
         }
 
+        foreach ($indexData as $productId => &$data) {
+            if (array_key_exists('cnet_description', $data) && !empty($data['cnet_description'])) {
+                $data['description'] = $data['cnet_description'];
+                unset($data['cnet_description']);
+            }
+        }
+
         return $this->filterCompositeProducts($indexData);
     }
 
