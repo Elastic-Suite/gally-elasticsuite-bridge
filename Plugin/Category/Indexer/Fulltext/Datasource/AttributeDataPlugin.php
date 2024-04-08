@@ -2,49 +2,21 @@
 
 namespace Gally\ElasticsuiteBridge\Plugin\Category\Indexer\Fulltext\Datasource;
 
+use Gally\ElasticsuiteBridge\Gally\CategoryManager;
 use Smile\ElasticsuiteCatalog\Model\Category\Indexer\Fulltext\Datasource\AttributeData;
 
 class AttributeDataPlugin
 {
-    public function afterAddData(AttributeData $subject, $result)
+    /** @var CategoryManager */
+    private $categoryManager;
+
+    public function __construct(CategoryManager $categoryManager)
     {
-        foreach ($result as $id => &$categoryData) {
-            $categoryIdentifier = 'cat_' . (string) $categoryData['entity_id'];
-            $categoryData['id'] = $categoryIdentifier;
-            $paths      = explode('/', $categoryData['path']);
-            array_shift($paths);
-            foreach ($paths as &$path) {
-                $path = 'cat_' . $path;
-            }
-            $categoryPath = implode('/', $paths);
-            $categoryData['path'] = $categoryPath;
-            $categoryData['name'] = is_array($categoryData['name'])
-                ? reset($categoryData['name'])
-                : $categoryData['name'];
+        $this->categoryManager     = $categoryManager;
+    }
 
-            $categoryData['parentId'] = 'cat_' . $categoryData['parent_id'];
-
-            // is_active is fetch from SQL directly and is not processed as other attributes.
-            // we don't go through the helper to have a nice formatting.
-            // but the source field is created as a "select" so we must be consistent.
-            // Otherwise, categories are rejected.
-            if (isset($categoryData['is_active'])) {
-                $isActive = [
-                    'value' => $categoryData['is_active'],
-                    'label' => $categoryData['is_active'] ? 'Yes' : 'No',
-                ];
-                $categoryData['is_active'] = $isActive;
-            }
-
-            if ($categoryData['level'] == 0) {
-                unset($result[$id]);
-            }
-
-            if ($categoryData['level'] == 1) {
-                $categoryData['parentId'] = null;
-            }
-        }
-
-        return $result;
+    public function afterAddData(AttributeData $subject, array $data, $storeId)
+    {
+        return $this->categoryManager->formatData($data, $storeId);
     }
 }

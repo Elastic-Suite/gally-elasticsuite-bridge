@@ -2,6 +2,10 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <gally_bridge>
+            <general>
+                <mode>api</mode>
+<!--                <mode>file</mode>-->
+            </general>
             <api>
                 <host>https://gally.localhost/</host>
 <!--                <host>https://ec2-34-245-123-117.eu-west-1.compute.amazonaws.com/</host> Gally llm -->

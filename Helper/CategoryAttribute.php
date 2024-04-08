@@ -46,6 +46,11 @@ class CategoryAttribute extends \Smile\ElasticsuiteCatalog\Helper\CategoryAttrib
      */
     public function prepareIndexValue($attributeId, $storeId, $value)
     {
+        // Backward compatibility.
+        if (!is_numeric($attributeId)) {
+            $attributeId = $this->getAttributeId($attributeId);
+        }
+
         return $this->attributeHelper->prepareIndexValue($attributeId, $storeId, $value);
     }
 }

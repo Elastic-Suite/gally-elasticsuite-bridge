@@ -18,8 +18,6 @@ class IndexPlugin extends AbstractPlugin
     private $sourceFieldManager;
 
     /**
-     * Constructor
-     *
      * @param ProductAttribute   $attributeHelper      Attribute helper.
      * @param SourceFieldManager $sourceFieldManager   Source Field Manager.
      * @param array              $indexedBackendModels List of indexed backend models added to the default list.

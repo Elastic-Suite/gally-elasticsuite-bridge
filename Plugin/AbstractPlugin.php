@@ -34,7 +34,7 @@ abstract class AbstractPlugin
         if (is_array($indexedBackendModels) && !empty($indexedBackendModels)) {
             $indexedBackendModels       = array_values($indexedBackendModels);
             $this->indexedBackendModels = array_merge($indexedBackendModels, $this->indexedBackendModels);
-        }
+    }
     }
 
     /**

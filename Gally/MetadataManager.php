@@ -2,29 +2,18 @@
 
 namespace Gally\ElasticsuiteBridge\Gally;
 
-use Gally\ElasticsuiteBridge\Gally\Api\Client;
 use Gally\Rest\Api\MetadataApi;
 use Gally\Rest\Model\MetadataMetadataRead;
 
-class MetadataManager
+class MetadataManager extends AbstractManager
 {
     private $metadataByEntityType = [];
-
     private $metadataById = [];
-
-    /** @var Client */
-    private $client;
-
-    public function __construct(Client $client)
-    {
-        $this->client = $client;
-        $this->getMetadata();
-    }
 
     public function getMetadataIdByEntityType($entityType)
     {
         if (!isset($this->metadataByEntityType[$entityType])) {
-            $this->getMetadata();
+            $this->init();
             if (!isset($this->metadataByEntityType[$entityType])) {
                 throw new \Exception("Cannot find Metadata for entity " . $entityType);
             }
@@ -36,7 +25,7 @@ class MetadataManager
     public function getMetadataEntityTypeById($metadataId)
     {
         if (!isset($this->metadataById[$metadataId])) {
-            $this->getMetadata();
+            $this->init();
             if (!isset($this->metadataById[$metadataId])) {
                 throw new \Exception("Cannot find Metadata with id " . $metadataId);
             }
@@ -45,12 +34,15 @@ class MetadataManager
         return $this->metadataById[$metadataId]->getEntity();
     }
 
-    private function getMetadata()
+    protected function init()
     {
+        if (!$this->isApiMode()) {
+            return;
+        }
+
         /** @var MetadataMetadataRead[] $metadata */
         $metadata = $this->client->query(MetadataApi::class, 'getMetadataCollection');
 
-        /** @var MetadataMetadataRead $metadatum */
         foreach ($metadata as $metadatum) {
             $this->metadataByEntityType[$metadatum->getEntity()] = $metadatum;
             $this->metadataById[$metadatum->getId()]             = $metadatum;

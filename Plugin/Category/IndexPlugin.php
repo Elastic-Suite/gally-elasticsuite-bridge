@@ -4,6 +4,7 @@ namespace Gally\ElasticsuiteBridge\Plugin\Category;
 
 use Gally\ElasticsuiteBridge\Gally\SourceFieldManager;
 use Gally\ElasticsuiteBridge\Helper\CategoryAttribute;
+use Gally\ElasticsuiteBridge\Model\Gally\SourceField\Exporter;
 use Gally\ElasticsuiteBridge\Plugin\AbstractPlugin;
 use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
 use Smile\ElasticsuiteCatalog\Helper\AbstractAttribute;
@@ -23,11 +24,11 @@ class IndexPlugin extends AbstractPlugin
      * @param array              $indexedBackendModels List of indexed backend models added to the default list.
      */
     public function __construct(
-        CategoryAttribute  $attributeHelper,
+        CategoryAttribute $attributeHelper,
         SourceFieldManager $sourceFieldManager,
-        array              $indexedBackendModels = []
+        array             $indexedBackendModels = []
     ) {
-        $this->attributeHelper    = $attributeHelper;
+        $this->attributeHelper = $attributeHelper;
         $this->sourceFieldManager = $sourceFieldManager;
 
         parent::__construct($indexedBackendModels);
