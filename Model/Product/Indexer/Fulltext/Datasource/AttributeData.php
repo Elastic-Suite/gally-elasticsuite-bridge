@@ -3,25 +3,21 @@
 namespace Gally\ElasticsuiteBridge\Model\Product\Indexer\Fulltext\Datasource;
 
 use Gally\ElasticsuiteBridge\Helper\ProductAttribute as AttributeHelper;
+use Magento\Catalog\Model\Product\Visibility;
 use Smile\ElasticsuiteCatalog\Model\ResourceModel\Eav\Indexer\Fulltext\Datasource\AbstractAttributeData as ResourceModel;
+use Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\AttributeData as BaseAttributeData;
 use Smile\ElasticsuiteCore\Api\Index\DatasourceInterface;
 use Smile\ElasticsuiteCore\Index\Mapping\FieldFactory;
 
-class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Fulltext\Datasource\AttributeData implements DatasourceInterface
+class AttributeData extends BaseAttributeData implements DatasourceInterface
 {
-    /**
-     * @var array
-     */
+    /** @var array */
     private $forbiddenChildrenAttributes = [];
 
-    /**
-     * @var \Gally\ElasticsuiteBridge\Helper\ProductAttribute
-     */
+    /** @var AttributeHelper */
     protected $attributeHelper;
 
     /**
-     * Constructor
-     *
      * @param ResourceModel   $resourceModel               Resource model.
      * @param FieldFactory    $fieldFactory                Mapping field factory.
      * @param AttributeHelper $attributeHelper             Attribute helper.
@@ -85,7 +81,7 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
             if (isset($data['visibility'])) {
                 $visibility = [
                     'value' => $data['visibility'],
-                    'label' => \Magento\Catalog\Model\Product\Visibility::getOptionText($data['visibility']),
+                    'label' => Visibility::getOptionText($data['visibility']),
                 ];
                 $data['visibility'] = $visibility;
             }
@@ -101,10 +97,8 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
      * @param int   $storeId    Indexed store id.
      * @param array $productIds Indexed product ids.
      * @param array $indexData  Original indexed data.
-     *
-     * @return array
      */
-    private function addAttributeData($storeId, $productIds, $indexData = [])
+    private function addAttributeData(int $storeId, array $productIds, array $indexData = []): array
     {
         foreach ($this->attributeIdsByTable as $backendTable => $attributeIds) {
             $attributesData = $this->loadAttributesRawData($storeId, $productIds, $backendTable, $attributeIds);
@@ -128,10 +122,8 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
      *
      * @param array $parentData      Parent product data.
      * @param array $childAttributes Child product attributes data.
-     *
-     * @return void
      */
-    private function addChildData(&$parentData, $childAttributes)
+    private function addChildData(array &$parentData, array $childAttributes): void
     {
         $authorizedChildAttributes = $parentData['children_attributes'];
         $addedChildAttributesData  = array_filter(
@@ -167,10 +159,8 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
      * @param array $parentData      Parent product data.
      * @param array $childAttributes Child product attributes data.
      * @param array $relation        Relation data between the child and the parent.
-     *
-     * @return void
      */
-    private function addRelationData(&$parentData, $childAttributes, $relation)
+    private function addRelationData(array &$parentData, array $childAttributes, array $relation): void
     {
         $childAttributeCodes  = array_keys($childAttributes);
 
@@ -207,10 +197,8 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
      * Filter out composite product when no enabled children are attached.
      *
      * @param array $indexData Indexed data.
-     *
-     * @return array
      */
-    private function filterCompositeProducts($indexData)
+    private function filterCompositeProducts(array $indexData): array
     {
         $compositeProductTypes = $this->resourceModel->getCompositeTypes();
 
@@ -231,7 +219,7 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
      * @param array $parentData Parent product data.
      * @param array $relation   Relation data between the child and the parent.
      */
-    private function addChildSku(&$parentData, $relation)
+    private function addChildSku(array &$parentData, array $relation): void
     {
         if (!isset($parentData["children.sku"])) {
             $parentData["children.sku"] = [];
@@ -247,7 +235,7 @@ class AttributeData extends \Smile\ElasticsuiteCatalog\Model\Product\Indexer\Ful
      * @param array  $productIndexData Product Index data
      * @param string $attributeCode    The attribute code
      */
-    private function addIndexedAttribute(&$productIndexData, $attributeCode)
+    private function addIndexedAttribute(array &$productIndexData, string $attributeCode)
     {
         if (!isset($productIndexData['indexed_attributes'])) {
             $productIndexData['indexed_attributes'] = [];

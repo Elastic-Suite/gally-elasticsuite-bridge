@@ -2,37 +2,36 @@
 
 namespace Gally\ElasticsuiteBridge\Gally\Api;
 
+use Gally\ElasticsuiteBridge\Gally\Api\Client\Configuration;
+use Gally\ElasticsuiteBridge\Gally\Api\Client\Options;
 use Gally\Rest\ApiException;
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Client;
-use Psr\Log\LoggerInterface;
 
 class Authentication
 {
-    private $token = null;
+    /** @var Configuration */
+    private $config;
+
+    /** @var Client */
+    private $client;
 
     public function __construct(
-        \Gally\ElasticsuiteBridge\Gally\Api\Client\Configuration $config,
-        \Gally\ElasticsuiteBridge\Gally\Api\Client\Options $curlOptions,
-        Client $client = null,
-        LoggerInterface $logger
+        Configuration $config,
+        Options $curlOptions
     ) {
         $this->config = $config;
-        $this->client = new Client(
-            $curlOptions->getOptions()
-        );
-        $this->logger = $logger;
+        $this->client = new Client($curlOptions->getOptions());
     }
 
-    public function getAuthenticationToken()
+    public function getAuthenticationToken(): string
     {
         $resourcePath = '/authentication_token';
-        $body         = [
+        $httpBody         = json_encode([
             'email'    => $this->config->getEmail(),
             'password' => $this->config->getPassword(),
-        ];
-        $httpBody = \GuzzleHttp\Utils::jsonEncode($body);
+        ]);
 
         $request = new Request(
             'POST',
@@ -56,12 +55,10 @@ class Authentication
         }
 
         try {
-            $response = \GuzzleHttp\Utils::jsonDecode($responseJson->getBody()->getContents());
+            $response = json_decode($responseJson->getBody()->getContents());
             return (string) $response->token;
         } catch (\Exception $e) {
-            throw new \LogicException(
-                "Unable to fetch authorization token from Api response."
-            );
+            throw new \LogicException("Unable to fetch authorization token from Api response.");
         }
     }
 }

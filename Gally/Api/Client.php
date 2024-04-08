@@ -2,25 +2,40 @@
 
 namespace Gally\ElasticsuiteBridge\Gally\Api;
 
+use Gally\Rest\Configuration;
 use Psr\Log\LoggerInterface;
 
 class Client
 {
     private $token = null;
 
+    /** @var Client\Configuration */
+    private $configuration;
+
+    /** @var Authentication */
+    private $authentication;
+
+    /** @var Client\Options */
+    private $curlOptions;
+
+    /** @var LoggerInterface */
+    private $logger;
+
+    private $debug = false;
+
     public function __construct(
         Client\Configuration $configuration,
         Authentication $authentication,
         Client\Options $options,
-        LoggerInterface $logger){
+        LoggerInterface $logger
+    ) {
         $this->configuration  = $configuration;
         $this->authentication = $authentication;
         $this->logger         = $logger;
         $this->curlOptions    = $options;
-        $this->debug          = false;
     }
 
-    public function getAuthorizationToken()
+    public function getAuthorizationToken(): string
     {
         if (null === $this->token) {
             $this->token = $this->authentication->getAuthenticationToken();
@@ -29,19 +44,14 @@ class Client
         return $this->token;
     }
 
-    public function query($endpoint, $operation, ...$input) {
-        $config = \Gally\Rest\Configuration::getDefaultConfiguration()->setApiKey(
-            'Authorization',
-            $this->getAuthorizationToken()
-        )->setApiKeyPrefix(
-            'Authorization',
-            'Bearer'
-        )->setHost(trim($this->configuration->getHost(), '/'));
+    public function query($endpoint, $operation, ...$input)
+    {
+        $config = Configuration::getDefaultConfiguration()
+            ->setApiKey('Authorization', $this->getAuthorizationToken())
+            ->setApiKeyPrefix('Authorization', 'Bearer')
+            ->setHost(trim($this->configuration->getHost(), '/'));
 
-        $apiInstance = new $endpoint(
-            new \GuzzleHttp\Client($this->curlOptions->getOptions()),
-            $config
-        );
+        $apiInstance = new $endpoint(new \GuzzleHttp\Client($this->curlOptions->getOptions()), $config);
 
         try {
             if ($this->debug === true) {
@@ -54,6 +64,7 @@ class Client
                 $this->logger->info(print_r($result, true));
             }
         } catch (\Exception $e) {
+            print_r($e->getMessage());
             $this->logger->info(get_class($e) . " when calling {$endpoint}->{$operation}: " . $e->getMessage());
             $this->logger->info($e->getTraceAsString());
             $this->logger->info("Input was");

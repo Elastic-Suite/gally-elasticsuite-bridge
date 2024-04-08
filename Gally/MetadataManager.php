@@ -3,6 +3,8 @@
 namespace Gally\ElasticsuiteBridge\Gally;
 
 use Gally\ElasticsuiteBridge\Gally\Api\Client;
+use Gally\Rest\Api\MetadataApi;
+use Gally\Rest\Model\MetadataMetadataRead;
 
 class MetadataManager
 {
@@ -10,10 +12,12 @@ class MetadataManager
 
     private $metadataById = [];
 
+    /** @var Client */
+    private $client;
+
     public function __construct(Client $client)
     {
         $this->client = $client;
-
         $this->getMetadata();
     }
 
@@ -43,10 +47,10 @@ class MetadataManager
 
     private function getMetadata()
     {
-        /** @var \Gally\Rest\Model\Metadata[] $metadata */
-        $metadata = $this->client->query(\Gally\Rest\Api\MetadataApi::class, 'getMetadataCollection');
+        /** @var MetadataMetadataRead[] $metadata */
+        $metadata = $this->client->query(MetadataApi::class, 'getMetadataCollection');
 
-        /** @var \Gally\Rest\Model\Metadata $metadatum */
+        /** @var MetadataMetadataRead $metadatum */
         foreach ($metadata as $metadatum) {
             $this->metadataByEntityType[$metadatum->getEntity()] = $metadatum;
             $this->metadataById[$metadatum->getId()]             = $metadatum;

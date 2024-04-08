@@ -8,6 +8,7 @@ use Magento\Framework\App\Helper\Context;
 
 class CategoryAttribute extends \Smile\ElasticsuiteCatalog\Helper\CategoryAttribute
 {
+    /** @var AbstractAttribute */
     private $attributeHelper;
 
     /**
@@ -35,11 +36,14 @@ class CategoryAttribute extends \Smile\ElasticsuiteCatalog\Helper\CategoryAttrib
      *
      * @return bool
      */
-    public function usesSource($attributeId)
+    public function usesSource(int $attributeId): bool
     {
         return $this->attributeHelper->usesSource($attributeId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function prepareIndexValue($attributeId, $storeId, $value)
     {
         return $this->attributeHelper->prepareIndexValue($attributeId, $storeId, $value);

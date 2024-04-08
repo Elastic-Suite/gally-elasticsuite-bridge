@@ -8,6 +8,7 @@ use Magento\Framework\App\Helper\Context;
 
 class ProductAttribute extends \Smile\ElasticsuiteCatalog\Helper\ProductAttribute
 {
+    /** @var AbstractAttribute */
     private $attributeHelper;
 
     /**
@@ -32,14 +33,15 @@ class ProductAttribute extends \Smile\ElasticsuiteCatalog\Helper\ProductAttribut
      * Mandatory because a lot of costly plugins (like in Swatches module) are plugged on this method.
      *
      * @param int $attributeId Attribute ID
-     *
-     * @return bool
      */
-    public function usesSource($attributeId)
+    public function usesSource($attributeId): bool
     {
         return $this->attributeHelper->usesSource($attributeId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function prepareIndexValue($attributeId, $storeId, $value)
     {
         return $this->attributeHelper->prepareIndexValue($attributeId, $storeId, $value);

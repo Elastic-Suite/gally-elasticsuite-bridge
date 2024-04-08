@@ -2,51 +2,52 @@
 
 namespace Gally\ElasticsuiteBridge\Index;
 
-use Gally\ElasticsuiteBridge\Gally\CatalogsManager;
 use Gally\ElasticsuiteBridge\Gally\Api\Client;
+use Gally\ElasticsuiteBridge\Gally\CatalogsManager;
+use Gally\Rest\Api\IndexApi;
+use Gally\Rest\Api\IndexDocumentApi;
+use Gally\Rest\Model\IndexCreate;
+use Gally\Rest\Model\IndexDetails;
+use Magento\Framework\ObjectManagerInterface;
+use Psr\Log\LoggerInterface;
+use Smile\ElasticsuiteCore\Api\Client\ClientInterface;
+use Smile\ElasticsuiteCore\Api\Index\Bulk\BulkRequestInterface;
+use Smile\ElasticsuiteCore\Api\Index\IndexInterface;
+use Smile\ElasticsuiteCore\Api\Index\IndexSettingsInterface;
+use Smile\ElasticsuiteCore\Index\IndexOperation as BaseIndexOperation;
 
-class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
+class IndexOperation extends BaseIndexOperation
 {
-    /**
-     * @var \Smile\ElasticsuiteCore\Api\Index\IndexInterface[]
-     */
+    /** @var IndexInterface[] */
     private $indicesByIdentifier = [];
 
-    /**
-     * @var \Gally\ElasticsuiteBridge\Gally\Api\Client
-     */
+    /** @var Client */
     private $client;
 
-    /**
-     * @var \Gally\ElasticsuiteBridge\Gally\CatalogsManager
-     */
+    /** @var CatalogsManager */
     private $catalogsManager;
 
-    /**
-     * @var \Magento\Framework\ObjectManagerInterface
-     */
+    /** @var ObjectManagerInterface */
     private $objectManager;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     private $indicesConfiguration;
 
     /**
-     * @param \Magento\Framework\ObjectManagerInterface                $objectManager   Object Manager
-     * @param \Smile\ElasticsuiteCore\Api\Client\ClientInterface       $esClient        ES Client (not used here)
-     * @param \Smile\ElasticsuiteCore\Api\Index\IndexSettingsInterface $indexSettings   Index Settings
-     * @param \Gally\ElasticsuiteBridge\Gally\Api\Client         $client          Gally Client
-     * @param \Gally\ElasticsuiteBridge\Gally\CatalogsManager          $catalogsManager Gally Catalog Manager
-     * @param \Psr\Log\LoggerInterface                                 $logger          Logger
+     * @param ObjectManagerInterface $objectManager   Object Manager
+     * @param ClientInterface        $esClient        ES Client (not used here)
+     * @param IndexSettingsInterface $indexSettings   Index Settings
+     * @param Client                 $client          Gally Client
+     * @param CatalogsManager        $catalogsManager Gally Catalog Manager
+     * @param LoggerInterface        $logger          Logger
      */
     public function __construct(
-        \Magento\Framework\ObjectManagerInterface $objectManager,
-        \Smile\ElasticsuiteCore\Api\Client\ClientInterface $esClient,
-        \Smile\ElasticsuiteCore\Api\Index\IndexSettingsInterface $indexSettings,
+        ObjectManagerInterface $objectManager,
+        ClientInterface $esClient,
+        IndexSettingsInterface $indexSettings,
         Client $client,
         CatalogsManager $catalogsManager,
-        \Psr\Log\LoggerInterface $logger
+        LoggerInterface $logger
     ) {
         $this->client               = $client;
         $this->catalogsManager      = $catalogsManager;
@@ -62,15 +63,11 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
     {
         $indexData = [
             'entityType' => $indexIdentifier,
-            'catalog'    => $this->catalogsManager->getLocalizedCatalogIdByStoreCode($store->getCode()),
+            'localizedCatalog' => (string) $this->catalogsManager->getLocalizedCatalogIdByStoreCode($store->getCode()),
         ];
 
-        /** @var \Gally\Rest\Model\IndexCreate $index */
-        $index = $this->client->query(
-            \Gally\Rest\Api\IndexApi::class,
-            'postIndexCollection',
-            $indexData
-        );
+        /** @var IndexCreate $index */
+        $index = $this->client->query(IndexApi::class, 'postIndexCollection', $indexData);
 
         $createIndexParams = [
             'identifier' => $indexIdentifier,
@@ -80,9 +77,16 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
         ];
 
         // Not needed for Gally. Just to avoid exception.
-        $createIndexParams += $this->indicesConfiguration['catalog_product'];
+        switch ($indexIdentifier) {
+            case "product":
+                $createIndexParams += $this->indicesConfiguration['catalog_product'];
+                break;
+            case "category":
+                $createIndexParams += $this->indicesConfiguration['catalog_category'];
+                break;
+        }
 
-        $index = $this->objectManager->create('\Smile\ElasticsuiteCore\Api\Index\IndexInterface', $createIndexParams);
+        $index = $this->objectManager->create(IndexInterface::class, $createIndexParams);
 
         $this->indicesByIdentifier[$indexIdentifier . '_' . $store->getCode()] = $index;
 
@@ -95,11 +99,8 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
     public function getIndexByName($indexIdentifier, $store)
     {
         if (!isset($this->indicesByIdentifier[$indexIdentifier . '_' . $store->getCode()])) {
-            /** @var \Gally\Rest\Model\IndexDetails $index */
-            $indices = $this->client->query(
-              \Gally\Rest\Api\IndexApi::class,
-              'getIndexCollection',
-            );
+            /** @var IndexDetails $index */
+            $indices = $this->client->query(IndexApi::class, 'getIndexCollection',);
 
             $index = null;
             foreach ($indices as $index) {
@@ -121,11 +122,11 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
     /**
      * {@inheritDoc}
      */
-    public function installIndex(\Smile\ElasticsuiteCore\Api\Index\IndexInterface $index, $store)
+    public function installIndex(IndexInterface $index, $store)
     {
-        /** @var \Gally\Rest\Model\IndexDetails $index */
+        /** @var IndexDetails $index */
         $index = $this->client->query(
-            \Gally\Rest\Api\IndexApi::class,
+            IndexApi::class,
             'installIndexItem',
             name: $index->getName(),
             index: []
@@ -137,11 +138,11 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
     /**
      * {@inheritDoc}
      */
-    public function refreshIndex(\Smile\ElasticsuiteCore\Api\Index\IndexInterface $index)
+    public function refreshIndex(IndexInterface $index)
     {
-        /** @var \Gally\Rest\Model\IndexDetails $index */
+        /** @var IndexDetails $index */
         $index = $this->client->query(
-            \Gally\Rest\Api\IndexApi::class,
+            IndexApi::class,
             'refreshIndexItem',
             name: $index->getName(),
             index: []
@@ -150,13 +151,13 @@ class IndexOperation extends \Smile\ElasticsuiteCore\Index\IndexOperation
         return $index;
     }
 
-    public function executeBulk(\Smile\ElasticsuiteCore\Api\Index\Bulk\BulkRequestInterface $bulk)
+    public function executeBulk(BulkRequestInterface $bulk)
     {
         $bulkResult = null;
 
         foreach ($bulk->getOperations() as $indexName => $documents) {
             $bulkResult = $this->client->query(
-                \Gally\Rest\Api\IndexDocumentApi::class,
+                IndexDocumentApi::class,
                 'postIndexDocumentCollection',
                 ['indexName' => $indexName, 'documents' => $documents]
             );

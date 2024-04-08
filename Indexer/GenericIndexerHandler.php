@@ -4,51 +4,41 @@ namespace Gally\ElasticsuiteBridge\Indexer;
 
 use Gally\ElasticsuiteBridge\Gally\CatalogsManager;
 use Gally\ElasticsuiteBridge\Index\IndexOperation;
-use Gally\ElasticsuiteBridge\Gally\Api\Client;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Indexer\SaveHandler\Batch;
+use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Smile\ElasticsuiteCore\Api\Index\DatasourceInterface;
 use Smile\ElasticsuiteCore\Api\Index\DataSourceResolverInterfaceFactory;
 use Smile\ElasticsuiteCore\Api\Index\IndexOperationInterface;
 use Smile\ElasticsuiteCore\Api\Index\IndexSettingsInterface;
 use Smile\ElasticsuiteCore\Helper\Cache as CacheHelper;
-use Smile\ElasticsuiteCore\Helper\IndexSettings;
 
 class GenericIndexerHandler extends \Smile\ElasticsuiteCore\Indexer\GenericIndexerHandler
 {
-    /**
-     * @var \Smile\ElasticsuiteCore\Api\Index\IndexOperationInterface
-     */
+    /** @var IndexOperationInterface */
     private $indexOperation;
 
-    /**
-     * @var \Magento\Framework\Indexer\SaveHandler\Batch
-     */
+    /** @var Batch */
     private $batch;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $indexName;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $typeName;
 
-    /**
-     * @var CacheHelper
-     */
+    /** @var CacheHelper */
     private $cacheHelper;
 
-    /**
-     * @var \Smile\ElasticsuiteCore\Api\Index\DataSourceResolverInterfaceFactory
-     */
+    /** @var DataSourceResolverInterfaceFactory */
     private $dataSourceResolverFactory;
 
-    /**
-     * @var \Smile\ElasticsuiteCore\Api\Index\IndexSettingsInterface
-     */
-    private $indexSettings;
+    /** @var CatalogsManager */
+    private $catalogsManager;
+
+    /** @var StoreManagerInterface */
+    private $storeManager;
 
     /**
      * Constructor
@@ -67,21 +57,16 @@ class GenericIndexerHandler extends \Smile\ElasticsuiteCore\Indexer\GenericIndex
         Batch $batch,
         DataSourceResolverInterfaceFactory $dataSourceResolverFactory,
         IndexSettingsInterface $indexSettings,
-        IndexSettings $indexSettingsHelper,
         StoreManagerInterface $storeManager,
-        Client $client,
         CatalogsManager $catalogsManager,
-        $indexName,
-        $typeName
+        string $indexName,
+        string $typeName
     ) {
         $this->indexOperation = $indexOperation;
         $this->indexName     = $indexName;
         $this->typeName      = $typeName;
         $this->storeManager  = $storeManager;
         $this->batch         = $batch;
-        $this->client        = $client;
-        $this->indexSettings = $indexSettings;
-        $this->indexSettingsHelper = $indexSettingsHelper;
         $this->catalogsManager = $catalogsManager;
         $this->dataSourceResolverFactory = $dataSourceResolverFactory;
         $this->cacheHelper = $cacheHelper;
@@ -149,14 +134,14 @@ class GenericIndexerHandler extends \Smile\ElasticsuiteCore\Indexer\GenericIndex
      */
     public function deleteIndex($dimensions, \Traversable $documents)
     {
-        // There is no DELETE API for documents actually.
+        // There is no DELETE API for documents yet.
         return $this;
     }
 
     /**
      * Retrieve data sources of an index by name.
      *
-     * @return \Smile\ElasticsuiteCore\Api\Index\DatasourceInterface[]
+     * @return DatasourceInterface[]
      */
     private function getDatasources()
     {
@@ -166,11 +151,12 @@ class GenericIndexerHandler extends \Smile\ElasticsuiteCore\Indexer\GenericIndex
     }
 
     /**
-     * Ensure store is an object or load it from it's id / identifier.
+     * Ensure store is an object or load it from its id / identifier.
      *
-     * @param integer|string|\Magento\Store\Api\Data\StoreInterface $store The store identifier or id.
+     * @param integer|string|StoreInterface $store The store identifier or id.
      *
-     * @return \Magento\Store\Api\Data\StoreInterface
+     * @return StoreInterface
+     * @throws NoSuchEntityException
      */
     private function getStore($store)
     {

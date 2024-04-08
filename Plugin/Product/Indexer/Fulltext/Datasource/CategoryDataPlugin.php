@@ -13,7 +13,6 @@ class CategoryDataPlugin
             if (isset($productData['category'])) {
                 foreach ($productData['category'] as &$categoryData) {
                     $categoryData['id'] = 'cat_' . $categoryData['category_id'];
-                    unset ($categoryData['category_id']);
                 }
 
                 $result[$productId]['category'] = $productData['category'];

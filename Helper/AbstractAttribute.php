@@ -2,24 +2,22 @@
 
 namespace Gally\ElasticsuiteBridge\Helper;
 
+use Magento\Catalog\Api\Data\EavAttributeInterface;
 use Magento\Catalog\Model\ResourceModel\Eav\AttributeFactory;
 use Magento\Framework\App\Helper\Context;
 
 class AbstractAttribute extends \Smile\ElasticsuiteCatalog\Helper\AbstractAttribute
 {
-    /**
-     * @var array
-     */
+    /** @var AttributeFactory */
+    private $attributeFactory;
+
+    /** @var array */
     private $attributes = [];
 
-    /**
-     * @var array
-     */
+    /** @var array */
     private $attributesCode = [];
 
-    /**
-     * @var array
-     */
+    /** @var array */
     private $attributeUsesSourceCache = [];
 
     public function __construct(Context $context, AttributeFactory $attributeFactory, $collectionFactory)
@@ -57,12 +55,8 @@ class AbstractAttribute extends \Smile\ElasticsuiteCatalog\Helper\AbstractAttrib
     /**
      * Compute result of $attribute->usesSource() into a local cache.
      * Mandatory because a lot of costly plugins (like in Swatches module) are plugged on this method.
-     *
-     * @param int $attributeId Attribute ID
-     *
-     * @return bool
      */
-    public function usesSource($attributeId)
+    public function usesSource(int $attributeId): bool
     {
         if (!is_numeric($attributeId)) {
             $attributeId = array_search($attributeId, $this->attributesCode);
@@ -81,15 +75,10 @@ class AbstractAttribute extends \Smile\ElasticsuiteCatalog\Helper\AbstractAttrib
      * This code uses a local cache to ensure correct performance during indexing.
      *
      * @param int $attributeId Product attribute id.
-     *
-     * @return \Magento\Catalog\Api\Data\EavAttributeInterface
      */
-    private function getAttributeById($attributeId)
+    protected function getAttributeById($attributeId): EavAttributeInterface
     {
         if (!isset($this->attributes[$attributeId])) {
-            /**
-             * @var EavAttributeInterface
-             */
             $attribute = $this->attributeFactory->create();
             $attribute->load($attributeId);
             $this->attributes[$attributeId] = $attribute;
@@ -103,15 +92,10 @@ class AbstractAttribute extends \Smile\ElasticsuiteCatalog\Helper\AbstractAttrib
      * This code uses a local cache to ensure correct performance during indexing.
      *
      * @param int $attributeId Product attribute id.
-     *
-     * @return string
      */
-    private function getAttributeCodeById($attributeId)
+    protected function getAttributeCodeById($attributeId): string
     {
         if (!isset($this->attributesCode[$attributeId])) {
-            /**
-             * @var EavAttributeInterface
-             */
             $attribute = $this->getAttributeById($attributeId);
             $this->attributesCode[$attributeId] = $attribute->getAttributeCode();
         }

@@ -5,17 +5,16 @@ namespace Gally\ElasticsuiteBridge\Plugin\Product;
 use Gally\ElasticsuiteBridge\Gally\SourceFieldManager;
 use Gally\ElasticsuiteBridge\Helper\ProductAttribute;
 use Gally\ElasticsuiteBridge\Plugin\AbstractPlugin;
+use Magento\Catalog\Model\ResourceModel\Eav\Attribute;
+use Magento\CatalogSearch\Model\Indexer\Fulltext;
+use Smile\ElasticsuiteCatalog\Helper\AbstractAttribute;
 
 class IndexPlugin extends AbstractPlugin
 {
-    /**
-     * @var \Smile\ElasticsuiteCatalog\Helper\AbstractAttribute
-     */
+    /** @var AbstractAttribute */
     protected $attributeHelper;
 
-    /**
-     * @var \Gally\ElasticsuiteBridge\Gally\SourceFieldManager
-     */
+    /** @var SourceFieldManager */
     private $sourceFieldManager;
 
     /**
@@ -36,25 +35,26 @@ class IndexPlugin extends AbstractPlugin
         parent::__construct($indexedBackendModels);
     }
 
-    public function beforeExecuteFull(\Magento\CatalogSearch\Model\Indexer\Fulltext $subject)
+    public function beforeExecuteFull(Fulltext $subject)
     {
         $this->initSourceFields();
     }
 
     /**
      * Init source fields used in Gally from Magento attributes.
-     *
-     * @return \Smile\ElasticsuiteCatalog\Model\Eav\Indexer\Fulltext\Datasource\AbstractAttributeData
      */
     private function initSourceFields()
     {
         $attributeCollection = $this->attributeHelper->getAttributeCollection();
 
-        /** @var \Magento\Catalog\Model\ResourceModel\Eav\Attribute $attribute */
+        /** @var Attribute $attribute */
         foreach ($attributeCollection as $attribute) {
             if ($this->canIndexAttribute($attribute)) {
                 $this->sourceFieldManager->addSourceField($attribute, 'product');
             }
         }
+
+        // Run last bulk if not empty.
+        $this->sourceFieldManager->runOptionBulk('product');
     }
 }

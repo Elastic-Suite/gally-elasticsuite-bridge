@@ -2,27 +2,30 @@
 
 namespace Gally\ElasticsuiteBridge\Plugin;
 
-use Gally\ElasticsuiteBridge\Export\File;
-use Gally\ElasticsuiteBridge\Model\Gally\SourceField\Exporter;
+use Magento\Catalog\Model\Attribute\Backend\Startdate;
+use Magento\Catalog\Model\Product\Attribute\Backend\Boolean;
+use Magento\Catalog\Model\Product\Attribute\Backend\Price;
+use Magento\Catalog\Model\Product\Attribute\Backend\Weight;
 use Magento\Eav\Model\Entity\Attribute\AttributeInterface;
+use Magento\Eav\Model\Entity\Attribute\Backend\ArrayBackend;
+use Magento\Eav\Model\Entity\Attribute\Backend\Datetime;
+use Magento\Eav\Model\Entity\Attribute\Backend\DefaultBackend;
 
 abstract class AbstractPlugin
 {
     public const FORBIDDEN_FIELD_NAMES = ['children'];
 
     protected $indexedBackendModels = [
-        \Magento\Eav\Model\Entity\Attribute\Backend\ArrayBackend::class,
-        \Magento\Eav\Model\Entity\Attribute\Backend\Datetime::class,
-        \Magento\Catalog\Model\Attribute\Backend\Startdate::class,
-        \Magento\Catalog\Model\Product\Attribute\Backend\Boolean::class,
-        \Magento\Eav\Model\Entity\Attribute\Backend\DefaultBackend::class,
-        \Magento\Catalog\Model\Product\Attribute\Backend\Weight::class,
-        \Magento\Catalog\Model\Product\Attribute\Backend\Price::class,
+        ArrayBackend::class,
+        Datetime::class,
+        Startdate::class,
+        Boolean::class,
+        DefaultBackend::class,
+        Weight::class,
+        Price::class,
     ];
 
     /**
-     * Constructor
-     *
      * @param array $indexedBackendModels List of indexed backend models added to the default list.
      */
     public function __construct(
@@ -38,10 +41,8 @@ abstract class AbstractPlugin
      * Check if an attribute can be indexed.
      *
      * @param AttributeInterface $attribute Entity attribute.
-     *
-     * @return boolean
      */
-    protected function canIndexAttribute(AttributeInterface $attribute)
+    protected function canIndexAttribute(AttributeInterface $attribute): bool
     {
         // 'price' attribute is declared as nested field into the indices file.
         $canIndex = $attribute->getBackendType() != 'static' && $attribute->getAttributeCode() !== 'price';

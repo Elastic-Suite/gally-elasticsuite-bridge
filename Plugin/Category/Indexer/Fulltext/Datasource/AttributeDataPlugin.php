@@ -8,8 +8,8 @@ class AttributeDataPlugin
 {
     public function afterAddData(AttributeData $subject, $result)
     {
-        foreach ($result as &$categoryData) {
-            $categoryIdentifier = 'cat_' . (string)$categoryData['entity_id'];
+        foreach ($result as $id => &$categoryData) {
+            $categoryIdentifier = 'cat_' . (string) $categoryData['entity_id'];
             $categoryData['id'] = $categoryIdentifier;
             $paths      = explode('/', $categoryData['path']);
             array_shift($paths);
@@ -18,6 +18,11 @@ class AttributeDataPlugin
             }
             $categoryPath = implode('/', $paths);
             $categoryData['path'] = $categoryPath;
+            $categoryData['name'] = is_array($categoryData['name'])
+                ? reset($categoryData['name'])
+                : $categoryData['name'];
+
+            $categoryData['parentId'] = 'cat_' . $categoryData['parent_id'];
 
             // is_active is fetch from SQL directly and is not processed as other attributes.
             // we don't go through the helper to have a nice formatting.
@@ -29,6 +34,14 @@ class AttributeDataPlugin
                     'label' => $categoryData['is_active'] ? 'Yes' : 'No',
                 ];
                 $categoryData['is_active'] = $isActive;
+            }
+
+            if ($categoryData['level'] == 0) {
+                unset($result[$id]);
+            }
+
+            if ($categoryData['level'] == 1) {
+                $categoryData['parentId'] = null;
             }
         }
 
