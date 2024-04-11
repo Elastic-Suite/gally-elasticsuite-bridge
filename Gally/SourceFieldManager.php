@@ -99,6 +99,8 @@ class SourceFieldManager extends AbstractManager
         if (empty($defaultLabel)) {
             $defaultLabel = str_replace('_',' ', ucwords($attributeCode,'_'));
         }
+        $defaultLabel  = str_replace('[','', $defaultLabel);
+        $defaultLabel  = str_replace(']','', $defaultLabel);
 
         $sourceFieldData = [
             'metadata'       => $entityType,
@@ -119,6 +121,8 @@ class SourceFieldManager extends AbstractManager
         foreach ($this->storeManager->getStores() as $store) {
             $attribute->setStoreId($store->getId());
             $label = $attribute->getStoreLabel($store->getId());
+            $label  = str_replace('[','', $label);
+            $label  = str_replace(']','', $label);
             $sourceFieldData['labels'][] = [
                 'localizedCatalog' => $store->getCode(),
                 'label' => empty($label) ? (string) $defaultLabel : $label,
@@ -150,6 +154,8 @@ class SourceFieldManager extends AbstractManager
 
                     foreach ($option->getStoreLabels() ?? [] as $storeId => $label) {
                         $labelStore = $this->storeManager->getStore($storeId);
+                        $label  = str_replace('[','', $label);
+                        $label  = str_replace(']','', $label);
                         $sourceFieldOptionData['labels'][] = [
                             'localizedCatalog' => $labelStore->getCode(),
                             'label' => $label ?: $option->getValue(),
@@ -165,6 +171,8 @@ class SourceFieldManager extends AbstractManager
                     if (empty($optionCode)) { // Can occur with some source models that returns empty option values.
                         $optionCode = $attributeCode . "_" . $key;
                     }
+                    $option['label']  = str_replace('[','', $option['label']);
+                    $option['label']  = str_replace(']','', $option['label']);
                     $this->createOption(
                         $entityType,
                         [
